@@ -18,11 +18,72 @@ import graphIcon from "../../src/assets/graph.png"
 import notificationIcon from "../../src/assets/notification.png"
 import folderIcon from "../../src/assets/folder.gif"
 import {useAuth} from "../../context/AuthContext.jsx";
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 
 
 const Dashboard=()=>{
-
+    const [users,setUsers]=useState([])
+    const navigate=useNavigate();
     const {user,isLoading}=useAuth();
+
+    const logout=async ()=>{
+        try {
+            const response=await fetch("http://localhost:3000/api/auth/logout",{
+                method:"GET",
+                credentials:'include',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            })
+
+            const res=await response.json();
+            if(!response.ok){
+                throw new Error(res.message)
+            }
+            alert("logout successfully")
+            navigate("/login");
+
+        }catch(e){
+            console.log(e)
+            alert(e.message)
+        }
+    }
+
+    const getUsers=async()=>{
+        try {
+            const response=await fetch("http://localhost:3000/api/get-all-users",{
+                method:"GET",
+                headers:{
+                    'Accept': 'application/json',
+                }
+            })
+            const res=await response.json();
+            if(!response.ok){
+                throw new Error(res.message)
+            }
+            const investors=res.users.filter(user=> user.role ==='investor')
+            setUsers(investors)
+            console.log(investors)
+        }catch (err){
+            console.log(err.message)
+            alert(err.message)
+        }
+    }
+
+    // console.log(user);
+
+    useEffect(()=>{
+        if(!isLoading){
+            if (!user){
+                navigate("/login");
+            }
+        }
+    },[user,isLoading])
+
+    useEffect(()=>{
+        getUsers()
+    },[])
 
     const mainSection=[
         {id:'overview',title:'Overview',icon:overviewGif},
@@ -47,6 +108,13 @@ const Dashboard=()=>{
         {id:'settings',title:'Settings',icon:settingsIcon},
     ]
 
+    if(isLoading){
+        return (
+            <div className="h-screen flex justify-center items-center w-full">
+                <p className="font-bold text-violet-500">loading</p>
+            </div>
+        )
+    }
     return(
         <>
         <div className="min-h-screen text-white">
@@ -123,7 +191,8 @@ const Dashboard=()=>{
                                 </div>
                             )
                         })}
-                        <button className="px-4 py-2 bg-violet-600 rounded-md hover:bg-violet-700 transition-all duration-200 ">LogOut</button>
+                        <button onClick={logout} className="px-4 py-2 bg-violet-600 rounded-md hover:bg-violet-800
+                         transition-all duration-200 ">LogOut</button>
                     </div>
                 </section>
                 {/*section 2 of grid*/}
@@ -131,7 +200,7 @@ const Dashboard=()=>{
                     {/*header*/}
                     <div className="flex justify-around items-center gap-4 p-4">
                        <div className="flex flex-col gap-2">
-                           <h2 className="font-bold text-4xl ">Good morning, <span className="text-violet-500">{user.username} </span></h2>
+                           <h2 className="font-bold text-4xl ">Good morning, <span className="text-violet-500">{user?.username} </span></h2>
                            <p className="text-[#8B9DC3] text-sm">Here's what's happening on your Nexus dashboard today.</p>
                        </div>
                         <div className="text-center">
@@ -224,19 +293,22 @@ const Dashboard=()=>{
                                 <p className="text-sm text-blue-400 hover:text-blue-500 cursor-pointer">Browse all</p>
                             </div>
                             <div className="h-0.5 w-full bg-gray-500 mt-4"></div>
-
-                            <div className="flex justify-between items-center gap-2 p-4">
-                                <div>
-                                    <p className="bg-violet-200 rounded-full p-2 text-violet-500">MU</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">Pitch Review Session</p>
-                                    <p  className="text-sm text-gray-500">with Sarah Malik · VC Fund</p>
-                                </div>
-                                <div>
-                                    <button className="border border-gray-400 p-3 rounded-full hover:bg-gray-700 transition-all duration-200">Request Meeting</button>
-                                </div>
-                            </div>
+                            {users.slice(0,2).map((user, index) => (
+                                <>
+                                    <div key={user._id} className="flex justify-between items-center gap-2 p-4">
+                                        <div>
+                                            <p className="bg-violet-200 rounded-full p-2 text-violet-500">{user.username}</p>
+                                        </div>
+                                        <div>
+                                            <p className="font-medium">Pitch Review Session</p>
+                                            <p  className="text-sm text-gray-500">with Sarah Malik · VC Fund</p>
+                                        </div>
+                                        <div>
+                                            <button className="border border-gray-400 p-3 rounded-full hover:bg-gray-700 transition-all duration-200">Request Meeting</button>
+                                        </div>
+                                    </div>
+                                </>
+                            ))}
                             <div className="h-0.5 w-full bg-cyan-500 mt-4"></div>
                         </div>
                     </div>

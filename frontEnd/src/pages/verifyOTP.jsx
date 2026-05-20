@@ -1,9 +1,11 @@
 import {useLocation, useNavigate} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
+import {useAuth} from "../../context/AuthContext.jsx";
 
 
 const VerifyOTP= () => {
+    const {setUser}=useAuth();
     const [loading, setLoading] = useState(false);
     const [timer, setTimer] = useState(0);
 
@@ -38,6 +40,7 @@ const VerifyOTP= () => {
             if (!response.ok){
                 throw new Error( result.message || "Failed to verify otp");
             }
+            setUser(result.user);
             navigateTo("/dashboard");
         }catch(err){
             console.log(err)

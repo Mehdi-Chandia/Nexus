@@ -378,3 +378,22 @@ export async function getUser(req, res) {
     })
 }
 }
+
+export async function getAllUsers(req, res) {
+    try {
+        const users=await User.find().select('-password')
+        if(!users){
+            return res.status(404).json({
+                message:"user not found",
+            })
+        }
+        return res.status(200).json({
+            message:"users found",
+            users:users
+        })
+    }catch(err) {
+        return res.status(500).json({
+            message:err.message
+        })
+    }
+}

@@ -104,3 +104,18 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 ### Issues Faced
 - No issues
 ---
+
+## Day 7
+- Started with the Authuser the login user handling 
+- then included the logout api 
+- then call the fetch all user api to show the investors on the entrepreneur's page
+
+
+### In Progress
+- The dashboard is in progress 
+
+### Issues Faced
+- I was facing the issue on dashboard because in context i was setting the loading state false initially and because of this as soon i refresh the dashboard page it push me to login page
+- so fixed it by setting loading state true initially when page renders it sees loading true shows loader and when loading becomes false it checks the user and then proceed
+- never call state setters in component body, call always inside functions 
+---

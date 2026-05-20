@@ -5,7 +5,7 @@ const AuthContext= createContext()
 
 export const AuthProvider=({children}) => {
 
-    const [isLoading,setIsLoading]=useState(false)
+    const [isLoading,setIsLoading]=useState(true)
     const [user,setUser]=useState(null)
 
     const fetchProfile=async()=>{
@@ -30,8 +30,8 @@ export const AuthProvider=({children}) => {
             console.log(data.user)
             setUser(data.user)
         }catch (err){
-            console.log(err)
-            alert(err.message)
+            console.log(err.message)
+            // alert(err.message)
         }finally{
             setIsLoading(false)
         }
@@ -44,7 +44,7 @@ export const AuthProvider=({children}) => {
 
 
     return(
-        <AuthContext.Provider value={{user, isLoading}}>
+        <AuthContext.Provider value={{user, isLoading,setUser}}>
             {children}
         </AuthContext.Provider>
     )
