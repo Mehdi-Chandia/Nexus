@@ -3,9 +3,11 @@ import {Link, useNavigate} from "react-router-dom";
 import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import {useState} from "react";
+import {useAuth} from "../../context/AuthContext.jsx";
 
 
 export function SignupPage() {
+    const {setUser}=useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const navigateTo = useNavigate();
 
@@ -13,7 +15,7 @@ export function SignupPage() {
             register,
             handleSubmit,
             watch,
-            formState: { errors,submitting },
+            formState: { errors,isSubmitting },
         } = useForm()
         const onSubmit=async (data) =>{
             try {
@@ -29,8 +31,9 @@ export function SignupPage() {
                 if (!response.ok){
                     throw new Error(res.message)
                 }
+                setUser(res.user)
                 alert("user registered successfully")
-                navigateTo("/login")
+                navigateTo("/complete-profile")
 
             }catch(err){
                 console.log(err)
@@ -115,7 +118,7 @@ export function SignupPage() {
                     <button
                         type="submit"
                         className={`w - full bg-violet-600 hover:bg-violet-700 transition rounded-xl p-4 py-3 
-                        font-semibold ${submitting ?'cursor-not-allowed opacity-40':''}`}
+                        font-semibold ${isSubmitting ?'cursor-not-allowed opacity-40':''}`}
                     >
                         Create Account
                     </button>

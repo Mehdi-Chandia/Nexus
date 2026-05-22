@@ -119,3 +119,16 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 - so fixed it by setting loading state true initially when page renders it sees loading true shows loader and when loading becomes false it checks the user and then proceed
 - never call state setters in component body, call always inside functions 
 ---
+
+## Day 8
+- First of all i, created the complete-profile page i forgot it to create early but now its created
+- then i, moved to meetings first i created the create-meeting page to request meetings with investors
+- called different APIs and store them in states like meetings notifications and also filtered accedpted meetings
+
+
+### In Progress
+- meetings and notifications functionality
+
+### Issues Faced
+- i was facing the issue on complete profile page like when user signs up it pushes to complete-profile but it first checks if the user from context hook but at that time user is not set in the hook and so user is null it again throws me to sign up page so, i set the user after registering user when user registers set the response user coming from backend to that state of contexg
+---

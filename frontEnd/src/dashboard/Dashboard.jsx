@@ -24,6 +24,9 @@ import {useNavigate} from "react-router-dom";
 
 const Dashboard=()=>{
     const [users,setUsers]=useState([])
+    const [meetings,setMeetings]=useState([])
+    const [notifications,setNotifications]=useState([])
+
     const navigate=useNavigate();
     const {user,isLoading}=useAuth();
 
@@ -52,10 +55,10 @@ const Dashboard=()=>{
 
     const getUsers=async()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/get-all-users",{
+            const response=await fetch("http://localhost:3000/api/auth/get-all-users",{
                 method:"GET",
                 headers:{
-                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                 }
             })
             const res=await response.json();
@@ -71,6 +74,46 @@ const Dashboard=()=>{
         }
     }
 
+    const getAllMeetings=async()=>{
+        try {
+            const response=await fetch("http://localhost:3000/api/meeting/all-meetings",{
+                method:"GET",
+                credentials:'include',
+                headers:{
+                    'Content-Type': 'application/json',
+                }
+            })
+            const res=await response.json();
+            if (!response.ok){
+                throw new Error(res.message)
+            }
+            // console.log(res.meetings)
+            setMeetings(res.meetings)
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    const getAllNotifications=async()=>{
+        try {
+            const response=await fetch("http://localhost:3000/api/notification/getAllNotifications",{
+                method:'GET',
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const res=await response.json();
+            if(!response.ok){
+                throw new Error(res.message)
+            }
+            console.log('notifications',res)
+        }catch (err){
+            console.log(err.message)
+        }
+    }
+    const acceptedMeetings=meetings.filter(m=> m.status === 'accepted')
+    // console.log('meetings of logged in user at dashboard page ',meetings)
     // console.log(user);
 
     useEffect(()=>{
@@ -83,6 +126,8 @@ const Dashboard=()=>{
 
     useEffect(()=>{
         getUsers()
+        getAllMeetings()
+        getAllNotifications()
     },[])
 
     const mainSection=[
@@ -131,6 +176,7 @@ const Dashboard=()=>{
                         <img className="invert" src={emailGif} alt="notificationEmail" width={26} />
                         <p className="text-sm ">{user?.email || 'eample@.com'}</p>
                     </div>
+                    <img className="rounded-full" src={user?.profilePicture?.fileUrl} alt={'profilePicture'} width={30} />
                 </div>
             </nav>
             {/*grid*/}
@@ -267,21 +313,27 @@ const Dashboard=()=>{
                             </div>
                             <div className="h-0.5 w-full bg-gray-500 mt-4"></div>
                         {/* meetings list*/}
-                            <div className="flex justify-between items-center gap-2 p-2">
-                                <div>
-                                    <p className="text-sm text-blue-400">10Am</p>
-                                    <p className="text-sm">Today</p>
-                                </div>
-                                <div>
-                                    <p className="font-medium">Pitch Review Session</p>
-                                    <p  className="text-sm text-gray-500">with Sarah Malik · VC Fund</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-blue-400 ">video</p>
-                                    <img src={videoIcon} alt="video" className="invert" width={28}/>
-                                    <img src={crossIcon} alt="cross" className="invert" width={28}/>
-                                </div>
-                            </div>
+                            {acceptedMeetings.length > 0 ? (
+                                acceptedMeetings.map((meeting) => {
+                                    return (
+                                        <div key={meeting._id} className="flex justify-between items-center gap-2 p-2">
+                                            <div>
+                                                <p className="text-sm text-blue-400">10Am</p>
+                                                <p className="text-sm">Today</p>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">Pitch Review Session</p>
+                                                <p  className="text-sm text-gray-500">with Sarah Malik · VC Fund</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-blue-400 ">video</p>
+                                                <img src={videoIcon} alt="video" className="invert" width={28}/>
+                                                <img src={crossIcon} alt="cross" className="invert" width={28}/>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            ) : (<p className="text-lg ml-16 text-gray-500 p-3 mt-4 ">No Meetings accepted yet! Schedule one.</p>)}
                             <div className="h-0.5 w-full bg-violet-600 mt-4"></div>
                         </div>
                         {/*investors lists*/}
@@ -300,11 +352,12 @@ const Dashboard=()=>{
                                             <p className="bg-violet-200 rounded-full p-2 text-violet-500">{user.username}</p>
                                         </div>
                                         <div>
-                                            <p className="font-medium">Pitch Review Session</p>
-                                            <p  className="text-sm text-gray-500">with Sarah Malik · VC Fund</p>
+                                            <p className="font-medium">{user.companyName}</p>
+                                            <p  className="text-sm text-gray-500">Industry of Interest {user.industryInterested}</p>
                                         </div>
                                         <div>
-                                            <button className="border border-gray-400 p-3 rounded-full hover:bg-gray-700 transition-all duration-200">Request Meeting</button>
+                                            <button onClick={()=> navigate(`/request-meeting/${user._id}`)} className="border border-gray-400 p-3 rounded-full
+                                             hover:bg-gray-700 transition-all duration-200">Request Meeting</button>
                                         </div>
                                     </div>
                                 </>

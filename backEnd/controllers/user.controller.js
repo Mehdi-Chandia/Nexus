@@ -260,6 +260,7 @@ export async function verifyOTP(req, res) {
         }
         user.twoFactorCode = null;
         user.twoFactorExpires = null;
+        user.isEmailVerified=true;
 
         await user.save();
 
@@ -363,12 +364,7 @@ export async function getUser(req, res) {
 
        return res.status(200).json({
            message:"user found",
-           user:{
-               id:user._id,
-               username:user.username,
-               email:user.email,
-               role:user.role
-           }
+           user:user
        })
   }catch(err) {
 

@@ -7,7 +7,7 @@ export async function createMeeting(req, res) {
     try {
         const {id}=req.params;
         const loggedUser=req.user;
-
+        console.log(req.body);
         const {agenda,startTime,endTime} = req.body;
 
         const {error}=meetingSchema.validate(req.body,{abortEarly: false});
@@ -205,13 +205,18 @@ export async function getSingleMeeting(req,res){
 export async function getAllMeetings(req,res){
     try {
         const userId=req.user.id;
-
+        console.log('logged in user id',userId)
         const meetings=await Meeting.find({
             $or:[
                 { entrepreneurId: userId },
                 { investorId: userId }
             ]
         }).sort({startTime: 1})
+        if (!meetings){
+            return res.status(404).json({
+                message:"No meetings found with given user"
+            })
+        }
 
         return res.status(200).json({
             success: true,

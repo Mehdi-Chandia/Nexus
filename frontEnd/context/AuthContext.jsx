@@ -27,7 +27,7 @@ export const AuthProvider=({children}) => {
             if (!response.ok){
                 throw new Error(data.message)
             }
-            console.log(data.user)
+            // console.log('user in auth context',data.user)
             setUser(data.user)
         }catch (err){
             console.log(err.message)
