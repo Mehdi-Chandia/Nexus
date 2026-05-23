@@ -9,6 +9,7 @@ import HomePage from "./pages/Home.jsx";
 import Dashboard from "./dashboard/Dashboard.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import CreateMeeting from "./meeting/CreateMeeting.jsx";
+import InvestorDashboard from "./investorDashboard/InvestorDashboard.jsx";
 
 
 
@@ -26,6 +27,7 @@ function App() {
         <Route path={"/forgot-password"} element={<ForgotPassword/>}/>
         <Route path={"/reset-password"} element={<ResetPassword/>}/>
         <Route path={"/dashboard"} element={<Dashboard/>}/>
+        <Route path={"/investor-dashboard"} element={<InvestorDashboard/>} />
         <Route path={"/complete-profile"} element={<CompleteProfile/>} />
         <Route path={"/request-meeting/:id"} element={<CreateMeeting/>} />
       </Routes>

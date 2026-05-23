@@ -11,6 +11,7 @@ export async function getNotifications(req, res) {
                 message: "Notifications not found.",
             })
         }
+        console.log(notifications);
         const unreadCount=await Notification.countDocuments({
             userId:userId,
             isRead:false

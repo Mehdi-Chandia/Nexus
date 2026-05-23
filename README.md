@@ -132,3 +132,16 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 ### Issues Faced
 - i was facing the issue on complete profile page like when user signs up it pushes to complete-profile but it first checks if the user from context hook but at that time user is not set in the hook and so user is null it again throws me to sign up page so, i set the user after registering user when user registers set the response user coming from backend to that state of contexg
 ---
+
+## Day 8
+- Integrated different APIs of meeting like rejecting/accepting meeting
+- make changes on dashboard interface and show real data of user
+- created the seperate dashboard for investor i didn't create but claude created it according to my already created dashboard for investor which i created by myself. 
+
+
+### In Progress
+- Next will be notifications setup and then will move to video calls and payment integration
+
+### Issues Faced
+- Nothing serious
+---
