@@ -7,7 +7,7 @@ export async function createMeeting(req, res) {
     try {
         const {id}=req.params;
         const loggedUser=req.user;
-        console.log(req.body);
+        // console.log(req.body);
         const {agenda,startTime,endTime} = req.body;
 
         const {error}=meetingSchema.validate(req.body,{abortEarly: false});

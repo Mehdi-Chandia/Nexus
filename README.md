@@ -133,7 +133,7 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 - i was facing the issue on complete profile page like when user signs up it pushes to complete-profile but it first checks if the user from context hook but at that time user is not set in the hook and so user is null it again throws me to sign up page so, i set the user after registering user when user registers set the response user coming from backend to that state of contexg
 ---
 
-## Day 8
+## Day 9
 - Integrated different APIs of meeting like rejecting/accepting meeting
 - make changes on dashboard interface and show real data of user
 - created the seperate dashboard for investor i didn't create but claude created it according to my already created dashboard for investor which i created by myself. 
@@ -144,4 +144,17 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 
 ### Issues Faced
 - Nothing serious
+---
+
+## Day 10
+- First of all added the login user's authorization handling on role base and pushing them to their respective dadhboards
+- setup of socket io never used it before so, it was my first time experience using it 
+- integrated socket in both backend and frontend and then check its working by sending simple messages
+
+
+### In Progress
+- Socket io is in progress still there is lot to do with it how it will work with real users
+
+### Issues Faced
+- It was a bit confusing or boring i, can say because using socket io first time so it was a bit confusing not difficult.
 ---

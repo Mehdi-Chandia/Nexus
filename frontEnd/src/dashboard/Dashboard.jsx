@@ -20,6 +20,7 @@ import folderIcon from "../../src/assets/folder.gif"
 import {useAuth} from "../../context/AuthContext.jsx";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
+import socket from "../socket.js";
 
 
 const Dashboard=()=>{
@@ -157,15 +158,27 @@ const Dashboard=()=>{
 
     const acceptedMeetings=meetings.filter(m=> m.status === 'accepted')
 
-    useEffect(()=>{
-        if(!isLoading){
-            if (!user){
-                navigate("/login");
-            }
+    useEffect(() => {
+        if (isLoading) return;
+
+        if (!user) {
+            navigate("/login");
+            return;
         }
-    },[user,isLoading])
+
+        if (user.role === "investor") {
+            navigate("/investor-dashboard");
+            return;
+        }
+
+        if (user.role !== "entrepreneur") {
+            navigate("/login");
+        }
+
+    }, [user, isLoading, navigate]);
 
     useEffect(()=>{
+        console.log(socket.id)
         getUsers()
         getAllMeetings()
         getAllNotifications()

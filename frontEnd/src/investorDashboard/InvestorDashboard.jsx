@@ -19,6 +19,7 @@ import investorIcon from "../../src/assets/investors.png"
 import { useAuth } from "../../context/AuthContext.jsx"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import socket from "../socket.js";
 
 const InvestorDashboard = () => {
 
@@ -103,10 +104,40 @@ const InvestorDashboard = () => {
 
     /* redirect if not logged in */
     useEffect(() => {
-        if (!isLoading && !user) navigate("/login")
-    }, [user, isLoading])
+        if (isLoading) return;
+
+        if (!user) {
+            navigate("/login");
+            return;
+        }
+
+        if (user.role === "entrepreneur") {
+            navigate("/dashboard");
+            return;
+        }
+
+        if (user.role !== "investor") {
+            navigate("/login");
+        }
+
+    }, [user, isLoading, navigate]);
 
     useEffect(() => {
+        socket.emit("send-message",{
+            text:'hello from dashboard'
+        })
+
+        socket.on("receive_message", (data) => {
+            console.log("From server:", data);
+        });
+        return ()=>{
+            socket.off("receive_message");
+        }
+    }, []);
+
+
+    useEffect(() => {
+        console.log('socket id of user ',socket.id)
         getStartups()
         getAllMeetings()
         getAllNotifications()
