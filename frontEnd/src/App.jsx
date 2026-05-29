@@ -10,6 +10,7 @@ import Dashboard from "./dashboard/Dashboard.jsx";
 import CompleteProfile from "./pages/CompleteProfile.jsx";
 import CreateMeeting from "./meeting/CreateMeeting.jsx";
 import InvestorDashboard from "./investorDashboard/InvestorDashboard.jsx";
+import ChatPage from "./pages/Chat.jsx";
 
 
 
@@ -30,6 +31,7 @@ function App() {
         <Route path={"/investor-dashboard"} element={<InvestorDashboard/>} />
         <Route path={"/complete-profile"} element={<CompleteProfile/>} />
         <Route path={"/request-meeting/:id"} element={<CreateMeeting/>} />
+        <Route path={"/messages/:meetingId"} element={<ChatPage/>} />
       </Routes>
     </BrowserRouter>
   </div>

@@ -31,6 +31,7 @@ const InvestorDashboard = () => {
 
     const navigate = useNavigate()
     const { user, isLoading } = useAuth()
+    // console.log(user);
 
     const logout = async () => {
         try {
@@ -96,11 +97,51 @@ const InvestorDashboard = () => {
         }
     }
 
+    const acceptMeeting=async (meetingId)=>{
+        try {
+            const response=await fetch(`http://localhost:3000/api/meeting/accept/${meetingId}`,{
+                method:"GET",
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const res=await response.json();
+            if(!response.ok){
+                throw new Error(res.message)
+            }
+            alert(res.message)
+        }catch (err){
+            console.log(err.message)
+        }
+    }
+
+    const rejectMeeting=async (meetingId)=>{
+        try {
+            const response=await fetch(`http://localhost:3000/api/meeting/reject/${meetingId}`,{
+                method:"POST",
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const res=await response.json();
+            if(!response.ok){
+                throw new Error(res.message)
+            }
+            alert(res.message)
+        }catch (err){
+            console.log(err.message)
+        }
+    }
+
     /* only accepted meetings */
     const acceptedMeetings = meetings.filter(m => m.status === 'accepted')
+    console.log('accepted meetings of investor',acceptedMeetings)
 
     /* pending meeting requests investor needs to act on */
     const pendingMeetings = meetings.filter(m => m.status === 'pending')
+    // console.log('pending',pendingMeetings)
 
     /* redirect if not logged in */
     useEffect(() => {
@@ -123,17 +164,24 @@ const InvestorDashboard = () => {
     }, [user, isLoading, navigate]);
 
     useEffect(() => {
-        socket.emit("send-message",{
-            text:'hello from dashboard'
-        })
-
-        socket.on("receive_message", (data) => {
-            console.log("From server:", data);
-        });
-        return ()=>{
-            socket.off("receive_message");
+        // socket.emit("send-message",{
+        //     text:'hello from dashboard'
+        // })
+        //
+        // socket.on("receive_message", (data) => {
+        //     console.log("From server:", data);
+        // });
+        // return ()=>{
+        //     socket.off("receive_message");
+        // }
+        // socket.emit('join-room','meeting123')
+        // socket.on("room-message", (msg) => {
+        //     console.log(msg)
+        // })
+        if (user){
+            socket.emit('register-user',user._id)
         }
-    }, []);
+    }, [user]);
 
 
     useEffect(() => {
@@ -270,12 +318,14 @@ const InvestorDashboard = () => {
                             <div key={m._id} className="flex justify-between items-center py-3 border-b border-gray-800">
                                 <div>
                                     <p className="text-sm font-medium text-white">{m.title || 'Meeting Request'}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">{m.description || 'No description'}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{m.agenda || 'No description'}</p>
                                 </div>
                                 <div className="flex gap-2">
                                     {/* accept / decline buttons — wire these to your API */}
-                                    <button className="text-xs bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded-full transition-all duration-200">Accept</button>
-                                    <button className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1 rounded-full transition-all duration-200">Decline</button>
+                                    <button onClick={()=> acceptMeeting(m._id)} className="text-xs bg-green-700 hover:bg-green-600 text-white
+                                     px-3 py-1 rounded-full transition-all duration-200">Accept</button>
+                                    <button onClick={()=> rejectMeeting(m._id)} className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1
+                                     rounded-full transition-all duration-200">Decline</button>
                                 </div>
                             </div>
                         ))
@@ -400,7 +450,13 @@ const InvestorDashboard = () => {
                                 )}
                                 {/* decline button for pending */}
                                 {m.status === 'pending' && (
-                                    <img src={crossIcon} alt="decline" className="invert cursor-pointer" width={22} />
+                                    // <img src={crossIcon} alt="decline" className="invert cursor-pointer" width={22} />
+                                    <div className="space-x-3">
+                                        <button onClick={()=> acceptMeeting(m._id)} className="px-4 py-2 bg-cyan-400 rounded-md hover:bg-cyan-500
+                                 transition-all duration-200">Accept</button>
+                                        <button onClick={()=> rejectMeeting(m._id)} className="px-4 py-2 bg-cyan-400 rounded-md hover:bg-cyan-500
+                                 transition-all duration-200">Reject</button>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -481,6 +537,40 @@ const InvestorDashboard = () => {
         </div>
     )
 
+    // chats section
+
+    const renderChat =()=>(
+        <div className='p-4'>
+            <h2 className="text-2xl font-bold text-violet-400 mb-4">Connect with Investors</h2>
+            <div className='bg-gray-800 rounded-md p-6 '>
+                {acceptedMeetings.length > 0 ? (
+                    acceptedMeetings.map((meeting) => (
+                        <div key={meeting._id} className="flex justify-between items-center gap-4 border p-4 border-violet-300 rounded-full">
+                            <div>
+                                <p className=' text-white '>Meeting with <span className='font-bold text-violet-500'> {meeting.entrepreneurId.username}</span></p>
+
+                                <p className='text-yellow-400'> Agenda: <span className="text-gray-500 text-sm"> {meeting.agenda}</span></p>
+                            </div>
+                            <div>
+                                <p className="text-gray-200">Scheduled on <span className="text-gray-500 text-sm"> {new Date(meeting.startTime).toLocaleString()}.</span></p>
+                            </div>
+                            <p className='text-sm bg-green-500 rounded-full p-1'>{meeting.status}</p>
+                            <div>
+                                <button onClick={()=> navigate(`/messages/${meeting._id}`)} className="bg-violet-500 px-4 py-2 rounded-md text-white
+                                hover:bg-violet-600 transition-all duration-200">start Chat</button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                        <img src={chatGif} alt="investors" className="invert opacity-30 mb-4" width={60}/>
+                        <p className="text-gray-500 text-lg">Request Investors and connect with them.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+
     /* pick what to render based on active section */
     const renderSection = () => {
         switch (activeSection) {
@@ -488,7 +578,7 @@ const InvestorDashboard = () => {
             case 'meeting':       return renderMeetings()
             case 'notification':  return renderNotifications()
             case 'startups':      return renderStartups()
-            case 'chat':          return renderComingSoon('Chat')
+            case 'chat':          return renderChat()
             case 'videoCall':     return renderComingSoon('Video Call')
             case 'documents':     return renderComingSoon('Documents')
             case 'payment':       return renderComingSoon('Payment')

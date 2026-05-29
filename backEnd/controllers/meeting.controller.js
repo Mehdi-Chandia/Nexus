@@ -205,13 +205,16 @@ export async function getSingleMeeting(req,res){
 export async function getAllMeetings(req,res){
     try {
         const userId=req.user.id;
-        console.log('logged in user id',userId)
-        const meetings=await Meeting.find({
-            $or:[
+         // console.log('logged in user id',userId)
+        const meetings = await Meeting.find({
+            $or: [
                 { entrepreneurId: userId },
                 { investorId: userId }
             ]
-        }).sort({startTime: 1})
+        })
+            .populate("entrepreneurId", "username profilePicture companyName")
+            .populate("investorId", "username profilePicture companyName")
+            .sort({ startTime: 1 });
         if (!meetings){
             return res.status(404).json({
                 message:"No meetings found with given user"

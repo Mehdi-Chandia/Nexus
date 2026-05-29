@@ -118,43 +118,7 @@ const Dashboard=()=>{
         }
     }
 
-    const acceptMeeting=async (meetingId)=>{
-        try {
-            const response=await fetch(`http://localhost:3000/api/meeting/accept/${meetingId}`,{
-                method:"GET",
-                credentials:'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            const res=await response.json();
-            if(!response.ok){
-                throw new Error(res.message)
-            }
-            alert(res.message)
-        }catch (err){
-            console.log(err.message)
-        }
-    }
 
-    const rejectMeeting=async (meetingId)=>{
-        try {
-            const response=await fetch(`http://localhost:3000/api/meeting/reject/${meetingId}`,{
-                method:"POST",
-                credentials:'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            const res=await response.json();
-            if(!response.ok){
-                throw new Error(res.message)
-            }
-            alert(res.message)
-        }catch (err){
-            console.log(err.message)
-        }
-    }
 
     const acceptedMeetings=meetings.filter(m=> m.status === 'accepted')
 
@@ -405,12 +369,7 @@ const Dashboard=()=>{
                                     <img src={videoIcon} alt="video" className="invert" width={28}/>
                                 )}
                             </div>
-                            <div className="space-x-3">
-                                <button onClick={()=> acceptMeeting(meeting._id)} className="px-4 py-2 bg-violet-600 rounded-md hover:bg-violet-800
-                                 transition-all duration-200">Accept</button>
-                                <button onClick={()=> rejectMeeting(meeting._id)} className="px-4 py-2 bg-violet-600 rounded-md hover:bg-violet-800
-                                 transition-all duration-200">Reject</button>
-                            </div>
+
                         </div>
                     ))
                 ) : (
@@ -486,6 +445,38 @@ const Dashboard=()=>{
         </div>
     )
 
+    const renderChat =()=>(
+        <div className='p-4'>
+            <h2 className="text-2xl font-bold text-violet-400 mb-4">Connect with Investors</h2>
+            <div className='bg-gray-800 rounded-md p-6'>
+                {acceptedMeetings.length > 0 ? (
+                    acceptedMeetings.map((meeting) => (
+                        <div key={meeting._id} className="flex justify-between items-center gap-2 border p-4 border-violet-300 rounded-full">
+                            <div>
+                                <p className=' text-white flex '>Meeting with <span className='font-bold text-violet-500'> {meeting.investorId.username}</span></p>
+
+                               <p className='text-yellow-400'> Agenda: <span className="text-gray-500 text-sm"> {meeting.agenda}</span></p>
+                            </div>
+                            <div>
+                                <p className="text-gray-200">Scheduled on <span className="text-gray-500 text-sm"> {new Date(meeting.startTime).toLocaleString()}.</span></p>
+                            </div>
+                            <p className='text-sm bg-green-500 rounded-full p-1'>{meeting.status}</p>
+                            <div>
+                                <button className="bg-violet-500 px-4 py-2 rounded-md text-white
+                                hover:bg-violet-600 transition-all duration-200">start Chat</button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+                        <img src={chatGif} alt="investors" className="invert opacity-30 mb-4" width={60}/>
+                        <p className="text-gray-500 text-lg">Request Investors and connect with them.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+
     const renderComingSoon = (label) => (
         <div className="flex flex-col items-center justify-center h-64 text-center p-8">
             <p className="text-4xl mb-4">🚧</p>
@@ -500,7 +491,7 @@ const Dashboard=()=>{
             case 'meeting':     return renderMeetings()
             case 'notification':return renderNotifications()
             case 'investor':    return renderInvestors()
-            case 'chat':        return renderComingSoon('Chat')
+            case 'chat':        return renderChat()
             case 'videoCall':   return renderComingSoon('Video Call')
             case 'documents':   return renderComingSoon('Documents')
             case 'payment':     return renderComingSoon('Payment')

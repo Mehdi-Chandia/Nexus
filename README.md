@@ -158,3 +158,15 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 ### Issues Faced
 - It was a bit confusing or boring i, can say because using socket io first time so it was a bit confusing not difficult.
 ---
+
+## Day 11
+- Back after a bit of absense started where left it with socket created models, controllers and routes for chat messages
+- connected socket with real users and meetings
+- created the chat page and called the previous messages api
+
+### In Progress
+- Socket io 
+
+### Issues Faced
+- Socket io is confusing for me!
+---
