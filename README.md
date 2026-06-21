@@ -170,3 +170,29 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 ### Issues Faced
 - Socket io is confusing for me!
 ---
+
+## Day 11
+- Completed the socket working ,it is working smoothly with real time messaging 
+- 
+
+### In Progress
+- Socket io
+
+### Issues Faced
+- there were lot of issues today i, wasn't handling the errors correctly which was causing problem 
+- one thing learn from this always check the whole flow how its going and where the data is breaching find the cause and detect the error
+---
+
+
+## Day 12
+- Back to work after ages i was busy with my exams now back to coding finally completed the video call using WEBRTC
+- Also implemented minor changes in investor dashboard minor but important
+- added the documents uploading page with view of the uploaded documents
+
+### In Progress
+- The other dashboard is in process as the investor side is completed
+
+### Issues Faced
+- Working with socket and webRTC without understanding it was really a headache for me i, didn't know a single thing about these two
+- I'm still confused how it is working the code as i took the help of AI in this webRTC thing
+---

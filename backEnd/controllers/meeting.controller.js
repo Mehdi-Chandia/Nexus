@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import Meeting from "../models/meeting.model.js";
 import {meetingSchema} from "../validation/auth.validation.js";
 import Notification from "../models/notification.model.js";
+import {getIo} from "../socket/socket.js";
+import {onlineUsers} from "../socket/onlineUsers.js";
+
 
 export async function createMeeting(req, res) {
     try {
@@ -57,6 +60,20 @@ export async function createMeeting(req, res) {
             relatedModel:'Meeting',
             isRead:false
         })
+
+        const io=getIo();
+        const receiverSocketId=onlineUsers[id]
+        console.log("Target user id:", id);
+        console.log("Online users:", onlineUsers);
+        console.log("Socket found:", onlineUsers[id]);
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "new-notification",
+                newNotification
+            )
+            console.log("Notification emitted");
+        }
 
         return res.status(201).json({
             success: true,
@@ -171,17 +188,22 @@ export async function rejectMeeting(req, res) {
 export async function getSingleMeeting(req,res){
     try {
         const {meetingId} = req.params;
+        console.log('meetiing id ', meetingId);
         const userId=req.user.id;
+        // console.log('log in user id',userId)
 
-        const meeting=await Meeting.findById(meetingId);
+        const meeting=await Meeting.findById(meetingId)
+            .populate("entrepreneurId", "username companyName")
+            .populate("investorId", "username companyName")
         if (!meeting){
             return res.status(404).json({
                 message:"Meeting not found"
             })
         }
+        // console.log('entrep Id',meeting.entrepreneurId.toString())
 
-        const isParticipant = meeting.entrepreneurId.toString() === userId.toString() ||
-            meeting.investorId.toString() === userId.toString();
+        const isParticipant = meeting.entrepreneurId._id.toString() === userId.toString() ||
+            meeting.investorId._id.toString() === userId.toString();
 
         if (!isParticipant){
             return res.status(401).json({

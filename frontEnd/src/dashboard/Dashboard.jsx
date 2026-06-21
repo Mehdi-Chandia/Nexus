@@ -21,18 +21,89 @@ import {useAuth} from "../../context/AuthContext.jsx";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import socket from "../socket.js";
+import {toast} from "react-toastify";
 
 
 const Dashboard=()=>{
     const [users,setUsers]=useState([])
     const [meetings,setMeetings]=useState([])
     const [notifications,setNotifications]=useState([])
+    const [documents,setDocuments]=useState([])
+    const [singleMeeting,setSingleMeeting]=useState(null)
 
     const [activeSection, setActiveSection] = useState('overview')
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     const navigate=useNavigate();
     const {user,isLoading}=useAuth();
+    console.log('logged in user ',user)
+
+    const uploadDocuments=async (data)=>{
+        try {
+            const formData = new FormData();
+            formData.append('file',data.file)
+            formData.append('documentType',data.documentType)
+
+            const response=await fetch("http://localhost:3000/api/document//upload/:meetingId",{
+                method:"POST",
+                credentials:'include',
+                headers:{
+                    'Content-Type':'multipart/form-data'
+                },
+                body:formData
+            })
+            const res=await response.json();
+            if (!response.ok){
+                throw new Error(res.message)
+            }
+            console.log(res)
+        }catch (err){
+            console.log(err.message)
+        }
+    }
+
+    const fetchMeeting=async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/meeting/single-meeting/${meetingId}`, {
+                method:"GET",
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+            console.log('meeting data',data.meeting);
+            setSingleMeeting(data.meeting);
+        }catch (e) {
+            console.log(e.message)
+        }
+    }
+
+    const fetchDocuments=async ()=>{
+        try {
+            const response=await fetch("http://localhost:3000/api/document/getAllDocs",{
+                method:"GET",
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+        const data=await response.json();
+            if (!response.ok){
+                throw new Error(data.message);
+            }
+
+            console.log("docs",data.documents)
+
+            setDocuments(data.documents)
+        }catch(err){
+            console.log(err)
+            alert(err.message)
+        }
+    }
 
     const logout=async ()=>{
         try {
@@ -138,14 +209,33 @@ const Dashboard=()=>{
         if (user.role !== "entrepreneur") {
             navigate("/login");
         }
-
     }, [user, isLoading, navigate]);
 
+    useEffect(() => {
+        if (user?._id){
+            socket.emit('register-user',user._id)
+        }
+    }, [user]);
+
+    useEffect(() => {
+        socket.on(
+            "new-notification",
+            (notification) => {
+                console.log('notification',notification);
+                toast.info(notification?.message || 'you have a new notification');
+            }
+        );
+        return () => {
+            socket.off("new-notification")
+        }
+    }, []);
+
     useEffect(()=>{
-        console.log(socket.id)
+        // console.log(socket.id)
         getUsers()
         getAllMeetings()
         getAllNotifications()
+        fetchDocuments()
     },[])
 
     const mainSection=[
@@ -366,7 +456,7 @@ const Dashboard=()=>{
                                     {meeting.status}
                                 </span>
                                 {meeting.status === 'accepted' && (
-                                    <img src={videoIcon} alt="video" className="invert" width={28}/>
+                                    <img onClick={()=> navigate(`/video-call/${meeting._id}`)} src={videoIcon} alt="video" className="invert" width={28}/>
                                 )}
                             </div>
 
@@ -462,8 +552,10 @@ const Dashboard=()=>{
                             </div>
                             <p className='text-sm bg-green-500 rounded-full p-1'>{meeting.status}</p>
                             <div>
-                                <button className="bg-violet-500 px-4 py-2 rounded-md text-white
-                                hover:bg-violet-600 transition-all duration-200">start Chat</button>
+                                <button
+                                    onClick={()=> navigate(`/messages/${meeting._id}`)}
+                                    className="bg-violet-500 text-sm px-8 py-2 rounded-md text-white
+                                hover:bg-violet-600 transition-all duration-200">Start chat</button>
                             </div>
                         </div>
                     ))

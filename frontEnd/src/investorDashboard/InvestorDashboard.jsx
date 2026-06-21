@@ -18,14 +18,17 @@ import overviewGif from "../../src/assets/comic.png"
 import investorIcon from "../../src/assets/investors.png"
 import { useAuth } from "../../context/AuthContext.jsx"
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import {Link, useNavigate} from "react-router-dom"
 import socket from "../socket.js";
+import {toast} from "react-toastify";
 
 const InvestorDashboard = () => {
 
     const [startups, setStartups] = useState([])
     const [meetings, setMeetings] = useState([])
     const [notifications, setNotifications] = useState([])
+    const [documents, setDocuments] = useState([])
+    const [singleMeeting, setSingleMeeting] = useState({})
     const [activeSection, setActiveSection] = useState('overview')
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -97,6 +100,50 @@ const InvestorDashboard = () => {
         }
     }
 
+    // single meeting
+    const fetchMeeting=async () => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/meeting/single-meeting/${meetingId}`, {
+                method:"GET",
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+            // console.log('meeting data',data.meeting);
+            setSingleMeeting(data.meeting);
+        }catch (e) {
+            console.log(e.message)
+        }
+    }
+
+    const fetchDocuments=async () =>{
+        try {
+            const response=await fetch("http://localhost:3000/api/document/getAllDocs",{
+                method:"GET",
+                credentials:'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const data=await response.json();
+            if (!response.ok){
+                throw new Error(data.message);
+            }
+
+            // console.log("docs",data.documents)
+
+            setDocuments(data.documents)
+        }catch(err){
+            console.log(err)
+            alert(err.message)
+        }
+    }
+
     const acceptMeeting=async (meetingId)=>{
         try {
             const response=await fetch(`http://localhost:3000/api/meeting/accept/${meetingId}`,{
@@ -137,7 +184,7 @@ const InvestorDashboard = () => {
 
     /* only accepted meetings */
     const acceptedMeetings = meetings.filter(m => m.status === 'accepted')
-    console.log('accepted meetings of investor',acceptedMeetings)
+    // console.log('accepted meetings of investor',acceptedMeetings)
 
     /* pending meeting requests investor needs to act on */
     const pendingMeetings = meetings.filter(m => m.status === 'pending')
@@ -178,15 +225,31 @@ const InvestorDashboard = () => {
         // socket.on("room-message", (msg) => {
         //     console.log(msg)
         // })
-        if (user){
+        if (user?._id){
             socket.emit('register-user',user._id)
         }
     }, [user]);
 
+    useEffect(() => {
+        // console.log("Registering notification listener");
+        socket.on(
+            "new-notification",
+            (notification) => {
+                console.log(notification);
+                toast.info(notification?.message || 'you have a new notification');
+            }
+        );
+
+        return () => {
+            socket.off("new-notification")
+        }
+    }, []);
+
 
     useEffect(() => {
-        console.log('socket id of user ',socket.id)
+        // console.log('socket id of user ',socket.id)
         getStartups()
+        fetchDocuments()
         getAllMeetings()
         getAllNotifications()
     }, [])
@@ -285,7 +348,7 @@ const InvestorDashboard = () => {
                         <p className="bg-emerald-700 px-2 rounded-full text-xs text-white">3 New</p>
                     </div>
                     <h3 className="text-3xl font-bold text-emerald-400">8</h3>
-                    <p className="text-[#8B9DC3] text-xs mt-1">Pitch Decks Received</p>
+                    <p className="text-[#8B9DC3] text-xs mt-1">Pitch Decks </p>
                 </div>
 
                 <div className="bg-[#0D1626] text-center p-5 rounded-xl border border-yellow-500 shadow-[0_0_14px_rgba(234,179,8,0.3)]">
@@ -293,8 +356,8 @@ const InvestorDashboard = () => {
                         <img src={walletIcon} alt="wallet" className="invert" width={28} />
                         <p className="bg-yellow-500 px-2 rounded-full text-xs text-black">Active</p>
                     </div>
-                    <h3 className="text-3xl font-bold text-yellow-400"><span className="text-green-400">$</span>18.6K</h3>
-                    <p className="text-[#8B9DC3] text-xs mt-1">Total Invested</p>
+                    <h3 className="text-3xl font-bold text-yellow-400"><span className="text-green-400">$</span>{user?.investmentMax || '0.00'}</h3>
+                    <p className="text-[#8B9DC3] text-xs mt-1">Total Wallet</p>
                 </div>
 
             </div>
@@ -321,7 +384,7 @@ const InvestorDashboard = () => {
                                     <p className="text-xs text-gray-500 mt-0.5">{m.agenda || 'No description'}</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    {/* accept / decline buttons — wire these to your API */}
+                                    {/* accept / decline buttons*/}
                                     <button onClick={()=> acceptMeeting(m._id)} className="text-xs bg-green-700 hover:bg-green-600 text-white
                                      px-3 py-1 rounded-full transition-all duration-200">Accept</button>
                                     <button onClick={()=> rejectMeeting(m._id)} className="text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1
@@ -404,22 +467,28 @@ const InvestorDashboard = () => {
                             <img src={folderIcon} alt="docs" className="invert" width={24} />
                             <p className="font-semibold text-gray-300">Pitch Decks</p>
                         </div>
-                        <p className="text-xs text-cyan-400 hover:text-cyan-300 cursor-pointer">see all</p>
+                        <p onClick={()=> setActiveSection('documents')} className="text-xs text-cyan-400 hover:text-cyan-300 cursor-pointer">see all</p>
                     </div>
                     <div className="h-px w-full bg-gray-700 mb-3"></div>
 
                     {/* static placeholder — replace with real docs data when ready */}
-                    <div className="flex justify-between items-center py-3 border-b border-gray-800">
-                        <div className="flex items-center gap-3">
-                            <img src={fileIcon} alt="file" className="invert" width={24} />
-                            <div>
-                                <p className="text-sm text-white font-medium">Pitch Deck v3.pdf</p>
-                                <p className="text-xs text-gray-500">From Alex · 2.1 MB</p>
-                            </div>
-                        </div>
-                        <span className="text-xs bg-yellow-200 text-gray-800 rounded-full px-2 py-0.5">Under Review</span>
-                    </div>
-                    <div className="h-px w-full bg-cyan-800 mt-3"></div>
+                    {documents.length > 0 ? (
+                        documents.map((document) => (
+                            <>
+                                <div className="flex justify-between items-center py-3 border-b border-gray-800">
+                                    <div className="flex items-center gap-3">
+                                        <img src={fileIcon} alt="file" className="invert" width={24} />
+                                        <div>
+                                            <p className="text-sm text-white font-medium">{document.documentType || 'Pitch Deck'}</p>
+                                            <p className="text-xs text-gray-500">Meeting Date : {new Date(document.meetingDate).toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs bg-yellow-200 text-gray-800 rounded-full px-2 py-0.5">Under Review</span>
+                                </div>
+                                <div className="h-px w-full bg-cyan-800 mt-3"></div>
+                            </>
+                        ))
+                    ) : (<p className="text-gray-600 text-sm py-6 text-center">No Documents Uploaded yet.</p>)}
                 </div>
 
             </div>
@@ -437,17 +506,20 @@ const InvestorDashboard = () => {
                             <div className="flex items-center gap-3">
                                 <img src={meetingGif} alt="meeting" className="invert" width={24} />
                                 <div>
-                                    <p className="text-sm font-medium text-white">{m.title || 'Meeting'}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">{m.description || 'No description'}</p>
+                                    <p className="text-sm font-medium text-white">{m.entrepreneurId.username || 'Meeting'}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{m.agenda || 'No description'}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
+                                <p> <span className='text-cyan-400'>Start Time :</span> {new Date(m.startTime).toLocaleString()}</p>
                                 <span className={`text-xs px-3 py-1 rounded-full font-semibold ${statusColor(m.status)}`}>
                                     {m.status}
                                 </span>
                                 {m.status === 'accepted' && (
-                                    <img src={videoIcon} alt="video" className="invert" width={24} />
+                                    <img onClick={()=> navigate(`/video-call/${m._id}`)} src={videoIcon} alt="video" className="invert" width={24} />
                                 )}
+                                {m.status === 'accepted' && (<Link className="hover:text-cyan-400 hover:border-b
+                                border-cyan-400 transition-all duration-200" to={`/meeting/${m._id}`}>view details</Link>)}
                                 {/* decline button for pending */}
                                 {m.status === 'pending' && (
                                     // <img src={crossIcon} alt="decline" className="invert cursor-pointer" width={22} />
@@ -458,6 +530,47 @@ const InvestorDashboard = () => {
                                  transition-all duration-200">Reject</button>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <img src={meetingGif} alt="no meetings" className="invert opacity-20 mb-4" width={50} />
+                        <p className="text-gray-500">No meetings yet.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+
+
+    // video call section
+
+
+    const renderVideoCall = () => (
+        <div className="p-4">
+            <h2 className="text-xl font-bold text-cyan-400 mb-4">Start Calling with Entrepreneurs</h2>
+            <div className="bg-[#0D1626] rounded-xl border border-gray-700 overflow-hidden">
+                {acceptedMeetings.length > 0 ? (
+                    acceptedMeetings.map((m) => (
+                        <div key={m._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 border-b border-gray-800 hover:bg-[#111c30] transition-all duration-200">
+                            <div className="flex items-center gap-3">
+                                <img src={meetingGif} alt="meeting" className="invert" width={24} />
+                                <div>
+                                    <p className="text-sm font-medium text-white">{m.entrepreneurId.username || 'Meeting'}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{m.agenda || 'No description'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <p> <span className='text-cyan-400'>Meeting Start Time :</span> {new Date(m.startTime).toLocaleString()}</p>
+                                <span className={`text-xs px-3 py-1 rounded-full font-semibold ${statusColor(m.status)}`}>
+                                    {m.status}
+                                </span>
+                                {m.status === 'accepted' && (
+                                    <img onClick={()=> navigate(`/video-call/${m._id}`)} src={videoIcon} alt="video" className="invert" width={30} />
+                                )}
+
+
                             </div>
                         </div>
                     ))
@@ -538,36 +651,107 @@ const InvestorDashboard = () => {
     )
 
     // chats section
+    const renderChat = () => (
+        <div className="p-4 md:p-6">
+            <h2 className="text-xl md:text-2xl font-bold text-violet-400 mb-6">
+                Connect with Investors
+            </h2>
 
-    const renderChat =()=>(
-        <div className='p-4'>
-            <h2 className="text-2xl font-bold text-violet-400 mb-4">Connect with Investors</h2>
-            <div className='bg-gray-800 rounded-md p-6 '>
+            <div className="bg-gray-800 rounded-xl p-4 md:p-6">
                 {acceptedMeetings.length > 0 ? (
-                    acceptedMeetings.map((meeting) => (
-                        <div key={meeting._id} className="flex justify-between items-center gap-4 border p-4 border-violet-300 rounded-full">
-                            <div>
-                                <p className=' text-white '>Meeting with <span className='font-bold text-violet-500'> {meeting.entrepreneurId.username}</span></p>
+                    <div className="space-y-4">
+                        {acceptedMeetings.map((meeting) => (
+                            <div
+                                key={meeting._id}
+                                className="border border-violet-300 rounded-2xl p-4 flex flex-col lg:flex-row gap-4 lg:items-center
+                                 lg:justify-betweenbg-gray-900" >
+                                {/* Meeting details */}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-white text-sm md:text-base break-words">
+                                        Meeting with{" "}
+                                        <span className="font-bold text-violet-500">
+                    {meeting.entrepreneurId.username}
+                  </span>
+                                    </p>
 
-                                <p className='text-yellow-400'> Agenda: <span className="text-gray-500 text-sm"> {meeting.agenda}</span></p>
+                                    <p className="text-yellow-400 text-sm mt-2">
+                                        Agenda:
+                                        <span className="text-gray-400 ml-2 break-words">
+                    {meeting.agenda}
+                  </span>
+                                    </p>
+                                </div>
+
+                                {/* Date */}
+                                <div className="flex-1">
+                                    <p className="text-gray-200 text-sm">
+                                        Scheduled on
+                                    </p>
+
+                                    <p className="text-gray-400 text-sm break-words">
+                                        {new Date(meeting.startTime).toLocaleString()}
+                                    </p>
+                                </div>
+
+                                {/* Status */}
+                                <div className="flex justify-start lg:justify-center">
+                <span
+                    className=" bg-green-500 px-3 py-1rounded-full text-sm text-white w-fit">
+                  {meeting.status}
+                </span>
+                                </div>
+
+                                {/* Button */}
+                                <div className="w-full lg:w-auto">
+                                    <button
+                                        onClick={() =>
+                                            navigate(`/messages/${meeting._id}`)
+                                        }
+                                        className="w-full lg:w-autobg-violet-500 px-5 py-2 rounded-lg text-white hover:bg-violet-600
+                                        transition-all duration-200 "
+                                    >
+                                        Start Chat
+                                    </button>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-gray-200">Scheduled on <span className="text-gray-500 text-sm"> {new Date(meeting.startTime).toLocaleString()}.</span></p>
-                            </div>
-                            <p className='text-sm bg-green-500 rounded-full p-1'>{meeting.status}</p>
-                            <div>
-                                <button onClick={()=> navigate(`/messages/${meeting._id}`)} className="bg-violet-500 px-4 py-2 rounded-md text-white
-                                hover:bg-violet-600 transition-all duration-200">start Chat</button>
-                            </div>
-                        </div>
-                    ))
+                        ))}
+                    </div>
                 ) : (
-                    <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-                        <img src={chatGif} alt="investors" className="invert opacity-30 mb-4" width={60}/>
-                        <p className="text-gray-500 text-lg">Request Investors and connect with them.</p>
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <img
+                            src={chatGif}
+                            alt="investors"
+                            className="invert opacity-30 mb-4"
+                            width={60}
+                        />
+                        <p className="text-gray-500 text-sm md:text-lg">
+                            Request Investors and connect with them.
+                        </p>
                     </div>
                 )}
             </div>
+        </div>
+    );
+
+    const renderDocuments=()=>(
+        <div className='p-4'>
+            <h2 className="text-2xl font-bold text-cyan-400 mb-4">Uploaded Documents</h2>
+           <div>
+               {documents.length > 0 ? (
+                   documents.map((doc) =>(
+                           <div className="bg-gray-700 w-full h-full flex flex-col gap-3 p-3 ">
+                               <div className="bg-gray-500 p-3 rounded-md flex justify-between items-center">
+                                   <div>
+                                       <p className="text-cyan-300 text-lg font-bold">{doc.documentType || 'Pitch Dark'}</p>
+                                       <p className="text-gray-200 text-sm">Scheduled On : {new Date(doc.meetingDate).toLocaleString()}</p>
+                                   </div>
+                                   <a  className="text-gray-200 text-sm hover:text-cyan-400" href={doc.fileUrl} target={"_blank"}>View Document</a>
+                               </div>
+                           </div>
+                       ))
+               ) : (<p className="text-gray-500 text-xl">No Documents Uploaded Yet!</p>)}
+           </div>
+
         </div>
     )
 
@@ -579,8 +763,8 @@ const InvestorDashboard = () => {
             case 'notification':  return renderNotifications()
             case 'startups':      return renderStartups()
             case 'chat':          return renderChat()
-            case 'videoCall':     return renderComingSoon('Video Call')
-            case 'documents':     return renderComingSoon('Documents')
+            case 'videoCall':     return renderVideoCall()
+            case 'documents':     return renderDocuments()
             case 'payment':       return renderComingSoon('Payment')
             case 'transactions':  return renderComingSoon('Transactions')
             case 'profile':       return renderComingSoon('Profile')
@@ -613,8 +797,9 @@ const InvestorDashboard = () => {
 
                 {/* right side */}
                 <div className="flex items-center gap-3">
-                    <img className="invert hover:cursor-pointer hidden sm:block" src={notifGif} alt="notifications" width={26} />
-                    <img className="invert hover:cursor-pointer hidden sm:block" src={chatGif} alt="chat" width={26} />
+                    <span className='h-5 w-5 text-center top-3 rounded-full bg-red-500 text-white text-sm absolute z-30'>{notifications.length}</span>
+                    <img onClick={()=> setActiveSection('notification')} className="invert relative hover:cursor-pointer hidden sm:block" src={notifGif} alt="notifications" width={30} />
+                    <img onClick={()=> setActiveSection('chat')} className="invert hover:cursor-pointer hidden sm:block" src={chatGif} alt="chat" width={26} />
                     <div className="hidden sm:flex items-center gap-2 border border-gray-700 p-2 rounded-md">
                         <img className="invert" src={emailGif} alt="email" width={22} />
                         <p className="text-xs text-gray-300">{user?.email || 'investor@nexus.com'}</p>

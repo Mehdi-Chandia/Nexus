@@ -1,4 +1,4 @@
-import { useState } from 'react'
+
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import {SignupPage} from "./pages/Register.jsx";
 import {LoginPage} from "./pages/Login.jsx";
@@ -11,6 +11,9 @@ import CompleteProfile from "./pages/CompleteProfile.jsx";
 import CreateMeeting from "./meeting/CreateMeeting.jsx";
 import InvestorDashboard from "./investorDashboard/InvestorDashboard.jsx";
 import ChatPage from "./pages/Chat.jsx";
+import Meeting from "./pages/Meeting.jsx";
+import { ToastContainer } from 'react-toastify';
+import VideoCall from "./pages/VideoCall.jsx";
 
 
 
@@ -32,8 +35,11 @@ function App() {
         <Route path={"/complete-profile"} element={<CompleteProfile/>} />
         <Route path={"/request-meeting/:id"} element={<CreateMeeting/>} />
         <Route path={"/messages/:meetingId"} element={<ChatPage/>} />
+        <Route path={"/meeting/:meetingId"} element={<Meeting/>} />
+        <Route path={"/video-call/:meetingId"} element={<VideoCall/>} />
       </Routes>
     </BrowserRouter>
+    <ToastContainer />
   </div>
     </>
   )
