@@ -2,6 +2,8 @@ import Meeting from "../models/meeting.model.js";
 import {uploadToCloudinary} from "../config/cloudinary.js";
 import Document from "../models/document.model.js";
 import Notification from "../models/notification.model.js";
+import {onlineUsers} from "../socket/onlineUsers.js";
+import {getIo} from "../socket/socket.js";
 
 
 export async function uploadDocument(req, res) {
@@ -46,7 +48,7 @@ export async function uploadDocument(req, res) {
             ? meeting.investorId
             : meeting.entrepreneurId;
 
-        const newNorification=await Notification.create({
+        const newNotification=await Notification.create({
             userId: otherUserId,
             type: "document_uploaded",
             title: "New Document Uploaded",
@@ -55,6 +57,26 @@ export async function uploadDocument(req, res) {
             relatedModel: "Document",
             isRead: false
         })
+
+        const io=getIo();
+        const receiverSocketId=onlineUsers[otherUserId.toString()];
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "new-notification",
+                newNotification
+            )
+
+        }
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "dashboard-update",
+                {
+                    type:'new-meeting',
+                }
+            )
+        }
 
         return res.status(201).json({
             success: true,

@@ -3,6 +3,8 @@ import {useState} from "react";
 import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import {Link, useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
+
 
 export function LoginPage() {
 
@@ -29,7 +31,7 @@ export function LoginPage() {
             if (!response.ok){
                 throw new Error(res.message)
             }
-            alert("user loggedIn successfully")
+            toast.success("Now Verify user with OTP!")
             navigateTo("/verify-otp",{
                 state:{
                     email:res.email,
@@ -38,7 +40,7 @@ export function LoginPage() {
 
         }catch(err){
             console.log(err)
-            alert(err.message)
+            toast.error(err.message)
         }finally {
             setLoading(false);
         }
@@ -79,7 +81,7 @@ export function LoginPage() {
                             placeholder="Enter your password"
                             className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500"
                         />
-                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-115 invert mt-4 mr-2">
+                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-14 md:right-130 invert mt-4 mr-2">
                             {showPassword ? <FaEye /> : <FaEyeSlash />}
                         </span>
                         {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}

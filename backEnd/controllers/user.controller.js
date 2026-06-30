@@ -353,7 +353,7 @@ export async function Logout(req, res) {
 
 export async function getUser(req, res) {
    try {
-       console.log(req.user)
+       // console.log(req.user)
 
    const user=await User.findById({_id:req.user.id}).select('-password')
        if(!user){

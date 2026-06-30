@@ -196,3 +196,18 @@ Nexus is an Investor & Entrepreneur collaboration platform where users can sched
 - Working with socket and webRTC without understanding it was really a headache for me i, didn't know a single thing about these two
 - I'm still confused how it is working the code as i took the help of AI in this webRTC thing
 ---
+
+## Day 13
+- Completed the other remaining sections as well 
+- first of all integrated stripe for transactions 
+- then implemented it in both frontEnd and backend
+- showed all transactions history on dasshboard
+- created the about and contact pages
+- changed the otp send service from resend to nodemailer because resend wasn't working
+
+### In Progress
+- Nothing is in progress for now 
+
+### Issues Faced
+- Didn't face that many issues 
+---

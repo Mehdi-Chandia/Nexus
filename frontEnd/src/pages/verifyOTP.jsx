@@ -2,6 +2,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
 import {useAuth} from "../../context/AuthContext.jsx";
+import {toast} from "react-toastify";
 
 
 const VerifyOTP= () => {
@@ -41,10 +42,11 @@ const VerifyOTP= () => {
                 throw new Error( result.message || "Failed to verify otp");
             }
             setUser(result.user);
+            toast.success("OTP verified Successfully!");
             navigateTo("/dashboard");
         }catch(err){
             console.log(err)
-            alert(err.message)
+            toast.error("Something went wrong!");
         }finally {
             setLoading(false);
         }
@@ -67,7 +69,7 @@ const VerifyOTP= () => {
             if (!response.ok){
                 throw new Error( result.message || "Failed to resend otp");
             }
-            alert("OTP resend successfully");
+           toast.success("OTP resend successfully");
             setTimer(60)
         }catch(err){
             console.log(err)

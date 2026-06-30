@@ -21,6 +21,7 @@ import { useEffect, useState } from "react"
 import {Link, useNavigate} from "react-router-dom"
 import socket from "../socket.js";
 import {toast} from "react-toastify";
+import Footer from "../components/Footer.jsx";
 
 const InvestorDashboard = () => {
 
@@ -31,10 +32,40 @@ const InvestorDashboard = () => {
     const [singleMeeting, setSingleMeeting] = useState({})
     const [activeSection, setActiveSection] = useState('overview')
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [showInvestModal,setShowInvestModal]=useState(false);
+    const [selectedEntrepreneur,setSelectedEntrepreneur]=useState(null);
+    const [amount,setAmount]=useState("");
+    const [loadingPayment,setLoadingPayment]=useState(false);
+    const [paymentError,setPaymentError]=useState("");
+    const [meetingId, setMeetingId]=useState(null);
+    const [transactions,setTransactions]=useState([]);
 
     const navigate = useNavigate()
     const { user, isLoading } = useAuth()
     // console.log(user);
+
+    // get all transactions
+    const getTransactions=async ()=>{
+        try {
+            const response=await fetch("http://localhost:3000/api/payment/getAll",{
+                method:'GET',
+                credentials:'include',
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            const data=await response.json();
+            if (!response.ok){
+                throw new Error( data.message ||"Transaction failed." );
+            }
+            // console.log('transactions',data.payments)
+            setTransactions(data?.payments)
+
+        }catch (e) {
+            console.log(e.message)
+        }
+    }
 
     const logout = async () => {
         try {
@@ -157,7 +188,7 @@ const InvestorDashboard = () => {
             if(!response.ok){
                 throw new Error(res.message)
             }
-            alert(res.message)
+           toast.success(res.message)
         }catch (err){
             console.log(err.message)
         }
@@ -176,9 +207,48 @@ const InvestorDashboard = () => {
             if(!response.ok){
                 throw new Error(res.message)
             }
-            alert(res.message)
+            toast.success(res.message)
         }catch (err){
             console.log(err.message)
+        }
+    }
+
+    const handleInvestment=async ()=>{
+        setPaymentError("");
+        if(!amount){
+            return setPaymentError(
+                "Amount is required"
+            );
+        }
+        if(Number(amount)<100){
+            return setPaymentError(
+                "Minimum investment is 100"
+            );
+        }
+        try {
+            setLoadingPayment(true)
+            const response=await fetch(`http://localhost:3000/api/payment/create/${meetingId}`,{
+                method:'POST',
+                credentials:'include',
+                headers: {
+                   'Content-Type':"application/json",
+                },
+                body:JSON.stringify({
+                    amount:Number(amount),
+                })
+            })
+            const res=await response.json();
+            if(!response.ok){
+                throw new Error(res.message)
+            }
+            // console.log(res)
+            window.location.href=res.url
+            setMeetingId(null)
+        }catch (e) {
+            console.log(e.message)
+            setPaymentError(e.message)
+        }finally {
+            setLoadingPayment(false)
         }
     }
 
@@ -245,6 +315,29 @@ const InvestorDashboard = () => {
         }
     }, []);
 
+    useEffect(()=>{
+        socket.on(
+            "dashboard-update",
+            (data)=>{
+
+                console.log(
+                    "dashboard updated",
+                    data
+                );
+                getAllMeetings()
+                getAllNotifications()
+                fetchDocuments();
+
+            }
+        );
+
+        return ()=>{
+            socket.off(
+                "dashboard-update"
+            );
+        };
+    },[]);
+
 
     useEffect(() => {
         // console.log('socket id of user ',socket.id)
@@ -252,6 +345,7 @@ const InvestorDashboard = () => {
         fetchDocuments()
         getAllMeetings()
         getAllNotifications()
+        getTransactions();
     }, [])
 
     /* sidebar nav config */
@@ -309,14 +403,7 @@ const InvestorDashboard = () => {
         return 'bg-red-500 text-white'
     }
 
-    /* ── coming soon placeholder ── */
-    const renderComingSoon = (label) => (
-        <div className="flex flex-col items-center justify-center h-64 text-center p-8">
-            <p className="text-4xl mb-4">🚧</p>
-            <h3 className="text-xl font-bold text-gray-400">{label}</h3>
-            <p className="text-gray-600 mt-2 text-sm">Coming soon. Stay tuned!</p>
-        </div>
-    )
+
 
     /* ── overview: summary cards + quick lists ── */
     const renderOverview = () => (
@@ -473,9 +560,9 @@ const InvestorDashboard = () => {
 
                     {/* static placeholder — replace with real docs data when ready */}
                     {documents.length > 0 ? (
-                        documents.map((document) => (
+                        documents.map((document,index) => (
                             <>
-                                <div className="flex justify-between items-center py-3 border-b border-gray-800">
+                                <div key={document?._id || index} className="flex justify-between items-center py-3 border-b border-gray-800">
                                     <div className="flex items-center gap-3">
                                         <img src={fileIcon} alt="file" className="invert" width={24} />
                                         <div>
@@ -506,7 +593,7 @@ const InvestorDashboard = () => {
                             <div className="flex items-center gap-3">
                                 <img src={meetingGif} alt="meeting" className="invert" width={24} />
                                 <div>
-                                    <p className="text-sm font-medium text-white">{m.entrepreneurId.username || 'Meeting'}</p>
+                                    <p className="text-sm font-medium text-white">{m.entrepreneurId.username.charAt(0).toUpperCase() + m.entrepreneurId.username.slice(1) || 'Meeting'}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">{m.agenda || 'No description'}</p>
                                 </div>
                             </div>
@@ -523,10 +610,10 @@ const InvestorDashboard = () => {
                                 {/* decline button for pending */}
                                 {m.status === 'pending' && (
                                     // <img src={crossIcon} alt="decline" className="invert cursor-pointer" width={22} />
-                                    <div className="space-x-3">
-                                        <button onClick={()=> acceptMeeting(m._id)} className="px-4 py-2 bg-cyan-400 rounded-md hover:bg-cyan-500
+                                    <div className="space-y-2 space-x-2 md:space-x-3">
+                                        <button onClick={()=> acceptMeeting(m._id)} className="px-2 md:px-4 py-2 bg-cyan-400 rounded-md hover:bg-cyan-500
                                  transition-all duration-200">Accept</button>
-                                        <button onClick={()=> rejectMeeting(m._id)} className="px-4 py-2 bg-cyan-400 rounded-md hover:bg-cyan-500
+                                        <button onClick={()=> rejectMeeting(m._id)} className="px-2 md:px-4 py-2 bg-cyan-400 rounded-md hover:bg-cyan-500
                                  transition-all duration-200">Reject</button>
                                     </div>
                                 )}
@@ -545,7 +632,6 @@ const InvestorDashboard = () => {
 
 
     // video call section
-
 
     const renderVideoCall = () => (
         <div className="p-4">
@@ -595,7 +681,7 @@ const InvestorDashboard = () => {
                             <img src={notificationIcon} alt="notif" className="invert shrink-0" width={24} />
                             <div className="flex-1">
                                 <p className="text-yellow-400 text-sm font-medium">{n.message}</p>
-                                <p className="text-xs text-gray-600 mt-1">3 hours ago</p>
+                                <p className="text-xs text-gray-600 mt-1">{new Date(n.createdAt).toLocaleString()}</p>
                             </div>
                         </div>
                     ))
@@ -622,13 +708,13 @@ const InvestorDashboard = () => {
                                     {s.username?.[0]?.toUpperCase()}
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-white">{s.username}</p>
+                                    <p className="font-semibold text-white">{s.username.charAt(0).toUpperCase() + s.username.slice(1) || 'No name'}</p>
                                     <p className="text-xs text-gray-400">{s.companyName || 'No company'}</p>
                                 </div>
                             </div>
                             <div className="text-xs text-gray-400">
                                 <span className="text-gray-300">Industry: </span>
-                                {s.industryInterested || 'N/A'}
+                                {s.industry || 'N/A'}
                             </div>
                             <div className="flex gap-2 mt-auto">
                                 <button className="flex-1 border border-cyan-600 text-cyan-400 py-2 rounded-full text-xs hover:bg-cyan-700 hover:text-white transition-all duration-200">
@@ -755,6 +841,190 @@ const InvestorDashboard = () => {
         </div>
     )
 
+    const renderProfile = () => (
+        <div className="p-4 md:p-8 mx-2 md:mx-8 rounded-2xl bg-[#0D1626] shadow-lg">
+            <div className="flex flex-col items-center text-center gap-6">
+                {/* Profile Section */}
+                <div className="flex flex-col items-center">
+                    <img
+                        src={user?.profilePicture?.fileUrl}
+                        alt="profile"
+                        className="  w-24 h-24 md:w-32 md:h-32 rounded-full object-cover ring-4 ring-cyan-600 shadow-md"/>
+                    <h2 className="mt-4 text-xl md:text-3xl font-bold text-cyan-400">
+                        Mr. {user?.username}
+                    </h2>
+                    <p className="text-gray-400 text-sm md:text-lg capitalize">
+                        {user?.role}
+                    </p>
+                    <p className="text-gray-300 text-sm md:text-base break-all mt-2">
+                       <span className='text-yellow-300'> Email:</span> {user?.email}
+                    </p>
+                    <p className="text-gray-500 text-sm md:text-base break-all mt-2"> <span className="text-violet-500">Bio: </span> {user?.bio || 'No Bio'}</p>
+                </div>
+                {/* Company */}
+                <div className="w-full bg-[#152238] rounded-xl p-4">
+                    <p className="text-cyan-300 text-sm md:text-lg">
+          <span className="text-blue-400 font-semibold">
+            Company:
+                        </span>{" "}
+                        {user?.companyName || "No Company"}
+                    </p>
+                </div>
+                {/* Wallet */}
+                <div className="w-full bg-[#152238] rounded-xl p-4">
+                    <h3 className="text-xl md:text-2xl text-gray-300 font-semibold mb-3">
+                        Wallet
+                    </h3>
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                        <div className="bg-[#1B2A41] rounded-lg px-6 py-3">
+                            <p className="text-green-500 font-bold">
+                                Min
+                            </p>
+                            <p className="text-gray-300">
+                                {user?.investmentMin || "0.00"}
+                            </p>
+                        </div>
+                        <div className="bg-[#1B2A41] rounded-lg px-6 py-3">
+                            <p className="text-red-500 font-bold">
+                                Max
+                            </p>
+                            <p className="text-gray-300">
+                                {user?.investmentMax || "0.00"}
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {/* Industry */}
+                <div className="w-full bg-[#152238] rounded-xl p-4">
+                    <p className="text-gray-300 text-sm md:text-lg break-words">
+          <span className="text-cyan-400 font-semibold">
+            Industry Interested In:
+                   </span>{" "}
+                        {user?.industryInterested || "Tech"}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderPayment = () => (
+        <div className="p-4">
+            <h2 className="text-xl font-bold text-green-400 mb-6">Investment Opportunities</h2>
+
+            {meetings.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+
+                    {meetings.map((m) => (
+                        <div key={m._id} className="bg-[#0D1626] border border-gray-700 rounded-2xl p-5 hover:scale-[1.02] hover:border-green-500 transition-all duration-300 shadow-md">
+
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-12 w-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-bold text-lg">
+                                    {m?.entrepreneurId?.username?.charAt(0).toUpperCase()}
+                                </div>
+
+                                <div>
+                                    <p className="font-semibold text-white">{m?.entrepreneurId?.username || "Entrepreneur"}</p>
+                                    <p className="text-xs text-gray-500">Startup Pitch</p>
+                                </div>
+                            </div>
+
+                            <div className="mb-5">
+                                <p className="text-sm text-cyan-400 mb-1">Agenda</p>
+                                <p className="text-gray-300 line-clamp-2">{m.agenda || "No agenda available"}</p>
+                            </div>
+
+                            <button onClick={()=> {
+                                setSelectedEntrepreneur(m.entrepreneurId)
+                                setShowInvestModal(true)
+                                setMeetingId(m._id)
+                            }} className="w-full py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600 transition-all duration-200">
+                                Invest Now
+                            </button>
+
+                        </div>
+                    ))}
+
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center py-16">
+                    <img src={meetingGif} alt="empty" className="invert opacity-20 mb-4" width={60}/>
+                    <p className="text-gray-500">No investment opportunities available</p>
+                </div>
+            )}
+        </div>
+    )
+
+    // transactions section
+
+    const renderTransactions = () => (
+        <div className="p-4">
+            <h2 className="text-2xl font-bold text-cyan-400 mb-6">Investment Transactions</h2>
+
+            {transactions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {transactions.map((t) => (
+                        <div key={t._id} className="bg-[#0D1626] border border-cyan-900 rounded-2xl p-5 hover:border-cyan-500
+                        hover:shadow-lg hover:shadow-cyan-500/20 transition-all duration-300">
+                            {/* Amount */}
+                            <div className="flex justify-between items-center mb-5">
+                                <p className="text-sm text-gray-400">Investment</p>
+                                <p className="text-xl font-bold text-green-400">
+                                    ${t.amount}
+                                </p>
+                            </div>
+                            <div className="h-[1px] w-full bg-gray-700 mb-4"></div>
+                            {/* Investor */}
+                            <div className="mb-3">
+                                <p className="text-xs text-cyan-500">Investor</p>
+                                <p className="text-white font-semibold">
+                                    {t.investorId?.username || "Unknown"}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Company: {t.investorId?.companyName || "No Company"}
+                                </p>
+                            </div>
+
+                            {/* Entrepreneur */}
+                            <div className="mb-3">
+                                <p className="text-xs text-cyan-500">Entrepreneur</p>
+                                <p className="text-white font-semibold">
+                                    {t.entrepreneurId?.username || "Unknown"}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Startup: {t.entrepreneurId?.companyName || "No Startup"}
+                                </p>
+                            </div>
+                            <div className="h-[1px] w-full bg-gray-700 my-4"></div>
+                            {/* Status */}
+                            <div className="flex justify-between items-center">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                t.paymentStatus === "completed"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-yellow-400 text-gray-900"
+                            }`}>
+                                Completed
+                            </span>
+
+                                <p className="text-xs text-gray-500">
+                                    {new Date(t.createdAt).toLocaleDateString()}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center py-16">
+                    <p className="text-gray-500 text-lg">
+                        No transactions available
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+
     /* pick what to render based on active section */
     const renderSection = () => {
         switch (activeSection) {
@@ -765,15 +1035,16 @@ const InvestorDashboard = () => {
             case 'chat':          return renderChat()
             case 'videoCall':     return renderVideoCall()
             case 'documents':     return renderDocuments()
-            case 'payment':       return renderComingSoon('Payment')
-            case 'transactions':  return renderComingSoon('Transactions')
-            case 'profile':       return renderComingSoon('Profile')
-            case 'settings':      return renderComingSoon('Settings')
+            case 'payment':       return renderPayment()
+            case 'transactions':  return renderTransactions()
+            case 'profile':       return renderProfile()
+            case 'settings':      return renderOverview()
             default:              return renderOverview()
         }
     }
 
     return (
+
         <div className="min-h-screen text-white bg-[#060B14]">
 
             {/* navbar */}
@@ -790,14 +1061,14 @@ const InvestorDashboard = () => {
                 </button>
 
                 {/* logo */}
-                <div className="flex items-center gap-1">
+                <div onClick={()=> setActiveSection('overview')} className="flex cursor-pointer items-center gap-1">
                     <p className="bg-cyan-400 rounded-md text-[#060B14] px-2 text-xl font-bold">N</p>
                     <h2 className="text-2xl font-bold text-cyan-400">Nexus</h2>
                 </div>
 
                 {/* right side */}
                 <div className="flex items-center gap-3">
-                    <span className='h-5 w-5 text-center top-3 rounded-full bg-red-500 text-white text-sm absolute z-30'>{notifications.length}</span>
+                    <span onClick={()=> setActiveSection('notification')} className='h-5 w-5 text-center top-3 cursor-pointer rounded-full bg-red-500 text-white text-sm absolute z-30'>{notifications.length}</span>
                     <img onClick={()=> setActiveSection('notification')} className="invert relative hover:cursor-pointer hidden sm:block" src={notifGif} alt="notifications" width={30} />
                     <img onClick={()=> setActiveSection('chat')} className="invert hover:cursor-pointer hidden sm:block" src={chatGif} alt="chat" width={26} />
                     <div className="hidden sm:flex items-center gap-2 border border-gray-700 p-2 rounded-md">
@@ -877,11 +1148,11 @@ const InvestorDashboard = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 border-b border-gray-800">
                         <div>
                             <h2 className="font-bold text-2xl md:text-3xl">
-                                Welcome back, <span className="text-cyan-400">{user?.username}</span>
+                                Welcome back, <span className="text-cyan-400">Mr. {user?.username.charAt(0).toUpperCase() + user?.username.slice(1)}</span>
                             </h2>
                             <p className="text-[#8B9DC3] text-xs mt-1">Manage your investments and review startup opportunities.</p>
                         </div>
-                        <button className="border border-cyan-800 text-cyan-400 rounded-md px-4 py-2 text-sm hover:bg-cyan-900 hover:border-cyan-500 transition-all duration-200 whitespace-nowrap">
+                        <button onClick={()=> setActiveSection("startups")} className="border border-cyan-800 text-cyan-400 rounded-md px-4 py-2 text-sm hover:bg-cyan-900 hover:border-cyan-500 transition-all duration-200 whitespace-nowrap">
                             + Schedule Meeting
                         </button>
                     </div>
@@ -889,10 +1160,70 @@ const InvestorDashboard = () => {
                     {/* dynamic section */}
                     {renderSection()}
 
+
                 </main>
             </div>
+            {
+                showInvestModal && (
+                    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+                        <div className="bg-slate-900 w-[400px] p-6 rounded-xl border border-slate-700">
+                            <h2 className="text-2xl font-bold mb-5">
+                                Invest Amount
+                            </h2>
+                            <p className="text-gray-400 mb-4">
+                                Entrepreneur :
+                                <span className="text-cyan-400 text-lg"> {selectedEntrepreneur?.username}</span>
+                            </p>
+                            <input
+                                type="number"
+                                value={amount}
+                                onChange={(e)=>setAmount(e.target.value)}
+                                placeholder="Enter amount"
+                                className="w-full px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 outline-none"
+                            />
+                            {
+                                paymentError &&
+                                <p className="text-red-400 mt-2">
+                                    {paymentError}
+                                </p>
+                            }
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button
+                                    onClick={()=>{
+                                        setShowInvestModal(false);
+                                        setAmount("");
+                                    }}
+                                    className="px-4 py-2 rounded bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    disabled={loadingPayment}
+                                    onClick={handleInvestment}
+                                    className={`px-4 py-2 rounded bg-violet-600 ${
+                                        loadingPayment
+                                            ?
+                                            "opacity-50 cursor-not-allowed"
+                                            :
+                                            ""
+                                    }`}
+                                >
+                                    {
+                                        loadingPayment
+                                            ?
+                                            "Processing..."
+                                            :
+                                            "Proceed Payment"
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
+
 }
 
 export default InvestorDashboard

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 import {useForm} from "react-hook-form";
 
 const Meeting=()=>{
@@ -177,6 +177,7 @@ const Meeting=()=>{
                         </button>
 
                     </div>
+
                 </div>
                 </form>
 
@@ -228,6 +229,7 @@ const Meeting=()=>{
                 )}
 
             </div>
+            <Link className="text-gray-400 hover:text-blue-400 text-center text-sm mt-4" to={"/dashboard"}>Back to Dashboard</Link>
 
         </div>
     );

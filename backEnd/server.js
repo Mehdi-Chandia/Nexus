@@ -9,6 +9,7 @@ import meetingRoutes from "./routes/meeting.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import documentRoutes from "./routes/document.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import cookieParser from "cookie-parser";
 import { sendOTPEmail } from "./services/email.service.js";
 import Chat from "./models/chat.model.js";
@@ -30,6 +31,12 @@ const io = new Server(server, {
 
 setIo(io);
 
+app.use(
+    "/api/payment/webhook",
+    express.raw({type:"application/json"}),
+    paymentRoutes
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -40,12 +47,17 @@ app.use(cors({
 
 connectToDb();
 
+
+
 // ----- routes (unchanged) -----
 app.use("/api/auth", userRoutes);
 app.use("/api/meeting", meetingRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/document", documentRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/payment",paymentRoutes);
+
+
 
 
 io.on("connection", (socket) => {

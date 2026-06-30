@@ -2,6 +2,7 @@ import React, {useEffect} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import {useAuth} from "../../context/AuthContext.jsx";
+import {toast} from "react-toastify";
 
 const CreateMeeting = () => {
     const {id} = useParams();
@@ -29,7 +30,7 @@ const CreateMeeting = () => {
         if(!response.ok){
             throw new Error(result.message)
         }
-        alert(result.message)
+        toast.success(result.message)
         navigateTo("/dashboard")
     }
 

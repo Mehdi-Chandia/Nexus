@@ -1,6 +1,7 @@
 import {useForm} from "react-hook-form";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
 
 function ForgotPassword() {
     const [loading, setLoading] = useState(false);
@@ -25,6 +26,7 @@ function ForgotPassword() {
             if (!response.ok){
                 throw new Error(res.message)
             }
+            toast.info("Reset Link is sent to your email address")
             navigateTo("/")
         }catch (error) {
             console.log(error);

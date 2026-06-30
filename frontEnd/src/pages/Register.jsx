@@ -4,6 +4,7 @@ import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import {useState} from "react";
 import {useAuth} from "../../context/AuthContext.jsx";
+import {toast} from "react-toastify";
 
 
 export function SignupPage() {
@@ -32,12 +33,12 @@ export function SignupPage() {
                     throw new Error(res.message)
                 }
                 setUser(res.user)
-                alert("user registered successfully")
+                toast.success("user registered successfully")
                 navigateTo("/complete-profile")
 
             }catch(err){
                 console.log(err)
-                alert(err.message)
+                toast.error(err.message)
             }
         }
 
@@ -94,7 +95,7 @@ export function SignupPage() {
                             placeholder="Create password"
                             className="relative w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500"
                         />
-                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-110 invert mt-4 mr-2">
+                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-40 md:right-130 mt-4 mr-2">
                             {showPassword ? <FaEye /> : <FaEyeSlash />}
                         </span>
 

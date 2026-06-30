@@ -63,16 +63,22 @@ export async function createMeeting(req, res) {
 
         const io=getIo();
         const receiverSocketId=onlineUsers[id]
-        console.log("Target user id:", id);
-        console.log("Online users:", onlineUsers);
-        console.log("Socket found:", onlineUsers[id]);
 
         if(receiverSocketId){
             io.to(receiverSocketId).emit(
                 "new-notification",
                 newNotification
             )
-            console.log("Notification emitted");
+            // console.log("Notification emitted");
+        }
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "dashboard-update",
+                {
+                    type:'new-meeting',
+                }
+            )
         }
 
         return res.status(201).json({
@@ -114,7 +120,7 @@ export async function acceptMeeting(req, res) {
         meeting.status = "accepted";
         await meeting.save();
 
-        await Notification.create({
+      const notification=  await Notification.create({
             userId: meeting.entrepreneurId,
             type: "meeting_accepted",
             title: "Meeting Accepted",
@@ -123,6 +129,26 @@ export async function acceptMeeting(req, res) {
             relatedModel: "Meeting",
             isRead: false
         });
+
+        const io=getIo();
+        const receiverSocketId=onlineUsers[meeting.entrepreneurId];
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "new-notification",
+                notification
+            )
+
+        }
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "dashboard-update",
+                {
+                    type:'meeting-accepted',
+                }
+            )
+        }
 
         return res.status(200).json({
             success: true,
@@ -161,7 +187,7 @@ export async function rejectMeeting(req, res) {
         meeting.status = "rejected";
         await meeting.save();
 
-        await Notification.create({
+       const notification = await Notification.create({
             userId: meeting.entrepreneurId,
             type: "meeting_rejected",
             title: "Meeting Rejected",
@@ -170,6 +196,27 @@ export async function rejectMeeting(req, res) {
             relatedModel: "Meeting",
             isRead: false
         });
+
+
+        const io=getIo();
+        const receiverSocketId=onlineUsers[meeting.entrepreneurId.toString()];
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "new-notification",
+                notification
+            )
+
+        }
+
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit(
+                "dashboard-update",
+                {
+                    type:'meeting-rejected',
+                }
+            )
+        }
 
         return res.status(200).json({
             success: true,
@@ -236,7 +283,7 @@ export async function getAllMeetings(req,res){
         })
             .populate("entrepreneurId", "username profilePicture companyName")
             .populate("investorId", "username profilePicture companyName")
-            .sort({ startTime: 1 });
+            .sort({ startTime: -1 });
         if (!meetings){
             return res.status(404).json({
                 message:"No meetings found with given user"

@@ -2,6 +2,7 @@ import React, {useEffect} from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../context/AuthContext.jsx";
 import {useNavigate} from "react-router-dom";
+import {toast} from "react-toastify";
 
 
 const CompleteProfile = () => {
@@ -68,10 +69,12 @@ const CompleteProfile = () => {
             if (!response.ok){
                 throw new Error(res.message || "Something went wrong");
             }
+            toast.success("Your profile Completed Successfully!");
             navigate("/dashboard");
 
         } catch (err) {
             console.log(err);
+            toast.error("Something went wrong");
         }
     };
 
@@ -246,7 +249,6 @@ const CompleteProfile = () => {
                                     )}
                                     className="w-full bg-[#0f172a] border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500"
                                 />
-
                                 {errors.industryInterested && (
                                     <p className="text-red-500 text-sm mt-2">
                                         {
@@ -257,14 +259,11 @@ const CompleteProfile = () => {
                                     </p>
                                 )}
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
                                 <div>
                                     <label className="block text-gray-300 mb-2">
                                         Investment Minimum
                                     </label>
-
                                     <input
                                         type="number"
                                         placeholder="Minimum investment"
@@ -277,7 +276,6 @@ const CompleteProfile = () => {
                                         )}
                                         className="w-full bg-[#0f172a] border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500"
                                     />
-
                                     {errors.investmentMin && (
                                         <p className="text-red-500 text-sm mt-2">
                                             {
@@ -288,12 +286,10 @@ const CompleteProfile = () => {
                                         </p>
                                     )}
                                 </div>
-
                                 <div>
                                     <label className="block text-gray-300 mb-2">
                                         Investment Maximum
                                     </label>
-
                                     <input
                                         type="number"
                                         placeholder="Maximum investment"
@@ -306,7 +302,6 @@ const CompleteProfile = () => {
                                         )}
                                         className="w-full bg-[#0f172a] border border-gray-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500"
                                     />
-
                                     {errors.investmentMax && (
                                         <p className="text-red-500 text-sm mt-2">
                                             {
@@ -317,24 +312,29 @@ const CompleteProfile = () => {
                                         </p>
                                     )}
                                 </div>
-
                             </div>
                         </>
                     )}
-
                     {/* PROFILE PICTURE */}
                     <div>
                         <label className="block text-gray-300 mb-2">
                             Profile Picture
                         </label>
-
                         <input
                             type="file"
-                            {...register("profilePicture")}
+                            {...register("profilePicture",{required:'image is required'})}
                             className="w-full text-gray-300"
                         />
+                        {errors.profilePicture && (
+                            <p className="text-red-500 text-sm mt-2">
+                                {
+                                    errors
+                                        .profilePicture
+                                        .message
+                                }
+                            </p>
+                        )}
                     </div>
-
                     <button
                         type="submit"
                         className={`w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300
