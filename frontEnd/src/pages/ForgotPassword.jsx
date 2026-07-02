@@ -2,6 +2,7 @@ import {useForm} from "react-hook-form";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
+import {API_URL} from "../lib/api.js";
 
 function ForgotPassword() {
     const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ function ForgotPassword() {
     } = useForm()
     const onSubmit=async (data) =>{
         try {
-            const response=await fetch("http://localhost:3000/api/auth/forgot-password",{
+            const response=await fetch(`${API_URL}/api/auth/forgot-password`,{
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

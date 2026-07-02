@@ -22,6 +22,7 @@ import {Link, useNavigate} from "react-router-dom"
 import socket from "../socket.js";
 import {toast} from "react-toastify";
 import Footer from "../components/Footer.jsx";
+import {API_URL} from "../lib/api.js";
 
 const InvestorDashboard = () => {
 
@@ -47,7 +48,7 @@ const InvestorDashboard = () => {
     // get all transactions
     const getTransactions=async ()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/payment/getAll",{
+            const response=await fetch(`${API_URL}/api/payment/getAll`,{
                 method:'GET',
                 credentials:'include',
                 headers:{
@@ -69,7 +70,7 @@ const InvestorDashboard = () => {
 
     const logout = async () => {
         try {
-            const response = await fetch("http://localhost:3000/api/auth/logout", {
+            const response = await fetch(`${API_URL}/api/auth/logout`, {
                 method: "GET",
                 credentials: 'include',
                 headers: { 'Accept': 'application/json' }
@@ -86,7 +87,7 @@ const InvestorDashboard = () => {
     /* fetch all entrepreneurs/startups */
     const getStartups = async () => {
         try {
-            const response = await fetch("http://localhost:3000/api/auth/get-all-users", {
+            const response = await fetch(`${API_URL}/api/auth/get-all-users`, {
                 method: "GET",
                 headers: { 'Content-Type': 'application/json' }
             })
@@ -102,7 +103,7 @@ const InvestorDashboard = () => {
     /* fetch meetings for this investor */
     const getAllMeetings = async () => {
         try {
-            const response = await fetch("http://localhost:3000/api/meeting/all-meetings", {
+            const response = await fetch(`${API_URL}/api/meeting/all-meetings`, {
                 method: "GET",
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
@@ -118,7 +119,7 @@ const InvestorDashboard = () => {
     /* fetch notifications */
     const getAllNotifications = async () => {
         try {
-            const response = await fetch("http://localhost:3000/api/notification/getAllNotifications", {
+            const response = await fetch(`${API_URL}/api/notification/getAllNotifications`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' }
@@ -134,7 +135,7 @@ const InvestorDashboard = () => {
     // single meeting
     const fetchMeeting=async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/meeting/single-meeting/${meetingId}`, {
+            const response = await fetch(`${API_URL}/api/meeting/single-meeting/${meetingId}`, {
                 method:"GET",
                 credentials:'include',
                 headers: {
@@ -154,7 +155,7 @@ const InvestorDashboard = () => {
 
     const fetchDocuments=async () =>{
         try {
-            const response=await fetch("http://localhost:3000/api/document/getAllDocs",{
+            const response=await fetch(`${API_URL}/api/document/getAllDocs`,{
                 method:"GET",
                 credentials:'include',
                 headers: {
@@ -177,7 +178,7 @@ const InvestorDashboard = () => {
 
     const acceptMeeting=async (meetingId)=>{
         try {
-            const response=await fetch(`http://localhost:3000/api/meeting/accept/${meetingId}`,{
+            const response=await fetch(`${API_URL}/api/meeting/accept/${meetingId}`,{
                 method:"GET",
                 credentials:'include',
                 headers: {
@@ -196,7 +197,7 @@ const InvestorDashboard = () => {
 
     const rejectMeeting=async (meetingId)=>{
         try {
-            const response=await fetch(`http://localhost:3000/api/meeting/reject/${meetingId}`,{
+            const response=await fetch(`${API_URL}/api/meeting/reject/${meetingId}`,{
                 method:"POST",
                 credentials:'include',
                 headers: {
@@ -227,7 +228,7 @@ const InvestorDashboard = () => {
         }
         try {
             setLoadingPayment(true)
-            const response=await fetch(`http://localhost:3000/api/payment/create/${meetingId}`,{
+            const response=await fetch(`${API_URL}/api/payment/create/${meetingId}`,{
                 method:'POST',
                 credentials:'include',
                 headers: {

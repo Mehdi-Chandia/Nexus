@@ -4,6 +4,7 @@ import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import {Link, useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
+import {API_URL} from "../lib/api.js";
 
 
 export function LoginPage() {
@@ -21,7 +22,7 @@ export function LoginPage() {
     const onSubmit=async (data) =>{
         try {
             setLoading(true);
-            const response=await fetch("http://localhost:3000/api/auth/login",{
+            const response=await fetch(`${API_URL}/api/auth/login`,{
                 method:"POST",
                 credentials:'include',
                 headers:{"Content-Type":"application/json"},

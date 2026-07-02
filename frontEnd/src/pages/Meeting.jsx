@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {Link, useParams} from "react-router-dom";
 import {useForm} from "react-hook-form";
+import {API_URL} from "../lib/api.js";
 
 const Meeting=()=>{
     const {meetingId}=useParams();
@@ -23,7 +24,7 @@ const Meeting=()=>{
 
         // console.log(data)
         try {
-            const res=await fetch(`http://localhost:3000/api/document/upload/${meetingId}`,{
+            const res=await fetch(`${API_URL}/api/document/upload/${meetingId}`,{
                 method:"POST",
                 credentials:'include',
                 body:formData,
@@ -42,7 +43,7 @@ const Meeting=()=>{
 
     const fetchDocuments=async () => {
         try {
-            const response=await fetch(`http://localhost:3000/api/document/get-docs/${meetingId}`, {
+            const response=await fetch(`${API_URL}/api/document/get-docs/${meetingId}`, {
                 method: "GET",
                 credentials:'include',
                 headers: {'Content-Type': 'application/json'}
@@ -62,7 +63,7 @@ const Meeting=()=>{
 
     const fetchMeeting=async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/meeting/single-meeting/${meetingId}`, {
+            const response = await fetch(`${API_URL}/api/meeting/single-meeting/${meetingId}`, {
                 method:"GET",
                 credentials:'include',
                 headers: {

@@ -22,7 +22,7 @@ import {useEffect, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import socket from "../socket.js";
 import {toast} from "react-toastify";
-
+import {API_URL} from "../lib/api.js";
 
 const Dashboard=()=>{
     const [users,setUsers]=useState([])
@@ -43,7 +43,7 @@ const Dashboard=()=>{
     // get all transactions
     const getTransactions=async ()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/payment/getAll",{
+            const response=await fetch(`${API_URL}/api/payment/getAll`,{
                 method:'GET',
                 credentials:'include',
                 headers:{
@@ -69,7 +69,7 @@ const Dashboard=()=>{
             formData.append('file',data.file)
             formData.append('documentType',data.documentType)
 
-            const response=await fetch("http://localhost:3000/api/document//upload/:meetingId",{
+            const response=await fetch(`${API_URL}/api/document//upload/:meetingId`,{
                 method:"POST",
                 credentials:'include',
                 headers:{
@@ -89,7 +89,7 @@ const Dashboard=()=>{
 
     const fetchMeeting=async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/meeting/single-meeting/${meetingId}`, {
+            const response = await fetch(`${API_URL}/api/meeting/single-meeting/${meetingId}`, {
                 method:"GET",
                 credentials:'include',
                 headers: {
@@ -109,7 +109,7 @@ const Dashboard=()=>{
 
     const fetchDocuments=async ()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/document/getAllDocs",{
+            const response=await fetch(`${API_URL}/api/document/getAllDocs`,{
                 method:"GET",
                 credentials:'include',
                 headers: {
@@ -132,7 +132,7 @@ const Dashboard=()=>{
 
     const logout=async ()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/auth/logout",{
+            const response=await fetch(`${API_URL}/api/auth/logout`,{
                 method:"GET",
                 credentials:'include',
                 headers: {
@@ -155,7 +155,7 @@ const Dashboard=()=>{
 
     const getUsers=async()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/auth/get-all-users",{
+            const response=await fetch(`${API_URL}/api/auth/get-all-users`,{
                 method:"GET",
                 headers:{
                     'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ const Dashboard=()=>{
 
     const getAllMeetings=async()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/meeting/all-meetings",{
+            const response=await fetch(`${API_URL}/api/meeting/all-meetings`,{
                 method:"GET",
                 credentials:'include',
                 headers:{
@@ -196,7 +196,7 @@ const Dashboard=()=>{
 
     const getAllNotifications=async()=>{
         try {
-            const response=await fetch("http://localhost:3000/api/notification/getAllNotifications",{
+            const response=await fetch(`${API_URL}/api/notification/getAllNotifications`,{
                 method:'GET',
                 credentials:'include',
                 headers: {

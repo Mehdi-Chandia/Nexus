@@ -3,6 +3,7 @@ import {useForm} from "react-hook-form";
 import {useEffect, useState} from "react";
 import {useAuth} from "../../context/AuthContext.jsx";
 import {toast} from "react-toastify";
+import {API_URL} from "../lib/api.js";
 
 
 const VerifyOTP= () => {
@@ -25,7 +26,7 @@ const VerifyOTP= () => {
         // console.log(data)
         try {
             setLoading(true);
-            const response=await fetch("http://localhost:3000/api/auth/verify-otp",{
+            const response=await fetch(`${API_URL}/api/auth/verify-otp`,{
                 method:"POST",
                 credentials:'include',
                 headers: {
@@ -55,7 +56,7 @@ const VerifyOTP= () => {
     const resendOTP=async ()=>{
         try {
             setLoading(true);
-            const response=await fetch("http://localhost:3000/api/auth/resend-otp",{
+            const response=await fetch(`${API_URL}/api/auth/resend-otp`,{
                 method:"POST",
                 credentials:"include",
                 headers: {

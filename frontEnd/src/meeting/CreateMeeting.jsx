@@ -3,6 +3,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import {useAuth} from "../../context/AuthContext.jsx";
 import {toast} from "react-toastify";
+import {API_URL} from "../lib/api.js";
 
 const CreateMeeting = () => {
     const {id} = useParams();
@@ -18,7 +19,7 @@ const CreateMeeting = () => {
     } = useForm()
     const onSubmit=async (data) =>{
         console.log(data)
-        const response=await fetch(`http://localhost:3000/api/meeting/request-meeting/${id}`,{
+        const response=await fetch(`${API_URL}/api/meeting/request-meeting/${id}`,{
             method:'POST',
             credentials:'include',
             headers:{

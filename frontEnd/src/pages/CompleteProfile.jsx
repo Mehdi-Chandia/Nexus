@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../../context/AuthContext.jsx";
 import {useNavigate} from "react-router-dom";
 import {toast} from "react-toastify";
+import {API_URL} from "../lib/api.js";
 
 
 const CompleteProfile = () => {
@@ -56,7 +57,7 @@ const CompleteProfile = () => {
                 );
             }
 
-            const response = await fetch("http://localhost:3000/api/auth/complete-profile",{
+            const response = await fetch(`${API_URL}/api/auth/complete-profile`,{
                 method: "POST",
                 credentials:'include',
                 headers: {

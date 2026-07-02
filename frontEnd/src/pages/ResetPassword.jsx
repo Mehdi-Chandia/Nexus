@@ -2,6 +2,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import {useState} from "react";
 import {FaEye, FaEyeSlash} from "react-icons/fa";
+import {API_URL} from "../lib/api.js";
 
 function ResetPassword() {
     const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +29,7 @@ function ResetPassword() {
             return;
         }
         try {
-            const response=await fetch(`http://localhost:3000/api/auth/reset-password/${token}`,{
+            const response=await fetch(`${API_URL}/api/auth/reset-password/${token}`,{
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json",

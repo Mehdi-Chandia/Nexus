@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import socket from "../socket.js";
 import {useAuth} from "../../context/AuthContext.jsx";
+import {API_URL} from "../lib/api.js";
 
 const ChatPage = () => {
     const {meetingId}=useParams()
@@ -20,7 +21,7 @@ const ChatPage = () => {
     const fetchMessages = async () => {
         setIsloading(true);
         try {
-            const response = await fetch(`http://localhost:3000/api/chat/messages/${meetingId}`, {
+            const response = await fetch(`${API_URL}/api/chat/messages/${meetingId}`, {
                 method: "GET",
                 credentials:'include',
                 headers: {
@@ -43,7 +44,7 @@ const ChatPage = () => {
 
     const fetchMeeting=async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/meeting/single-meeting/${meetingId}`, {
+            const response = await fetch(`${API_URL}/api/meeting/single-meeting/${meetingId}`, {
                 method:"GET",
                 credentials:'include',
                 headers: {

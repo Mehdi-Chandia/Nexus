@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
-import {useEffect} from "react";
+import {API_URL} from "./lib/api.js";
 
 
-const socket = io("http://localhost:3000", {
+const socket = io(`${API_URL}`, {
     withCredentials: true,
 });
 

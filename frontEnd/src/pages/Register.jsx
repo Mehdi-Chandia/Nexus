@@ -5,6 +5,7 @@ import { FaEye } from "react-icons/fa";
 import {useState} from "react";
 import {useAuth} from "../../context/AuthContext.jsx";
 import {toast} from "react-toastify";
+import {API_URL} from "../lib/api.js";
 
 
 export function SignupPage() {
@@ -20,7 +21,7 @@ export function SignupPage() {
         } = useForm()
         const onSubmit=async (data) =>{
             try {
-                const response=await fetch("http://localhost:3000/api/auth/register",{
+                const response=await fetch(`${API_URL}/api/auth/register`,{
                     method: "POST",
                     credentials: "include",
                     headers: {
