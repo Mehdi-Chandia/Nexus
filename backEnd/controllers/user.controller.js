@@ -49,7 +49,8 @@ export async function SignUp(req, res) {
 
         res.cookie('token',token,{
             httpOnly:true,
-            secure:false
+            secure:true,
+            sameSite:"none"
         })
 
         return res.status(201).json({
@@ -196,12 +197,7 @@ export async function Login(req, res) {
             Date.now() + 5 * 60 * 1000;
         await user.save();
 
-        await sendOTPEmail(
-            user.email,
-            otp
-        )
-
-        return res.status(200).json({
+         res.status(200).json({
 
             message:"OTP sent successfully",
 
@@ -210,6 +206,11 @@ export async function Login(req, res) {
             email:user.email
         })
 
+        await sendOTPEmail(
+            user.email,
+            otp
+        )
+        return;
         // const token=jwt.sign({
         //     id:user._id,
         //     username:user.username,
@@ -277,8 +278,8 @@ export async function verifyOTP(req, res) {
 
         res.cookie("token",token,{
             httpOnly:true,
-            secure:false,
-            sameSite:"strict"
+            secure:true,
+            sameSite:"none"
         })
 
         return res.status(200).json({
@@ -320,12 +321,13 @@ export async function resendOTP(req, res) {
             Date.now() + 5 * 60 * 1000;
         await user.save();
 
-       await sendOTPEmail(email,otp)
-        return res.status(200).json({
+
+         res.status(200).json({
             success:true,
             message:"OTP Resend successfully",
         })
-
+        await sendOTPEmail(email,otp)
+        return;
     }catch(err) {
         return res.status(500).json({
             message:err.message
