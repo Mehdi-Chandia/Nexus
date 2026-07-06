@@ -1,32 +1,28 @@
-import * as brevo from "@getbrevo/brevo";
+import { BrevoClient } from "@getbrevo/brevo";
 
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(
-    brevo.TransactionalEmailsApiApiKeys.apiKey,
-    process.env.BREVO_API_KEY
-);
+const brevo = new BrevoClient({
+    apiKey: process.env.BREVO_API_KEY,
+});
 
 export async function sendOTPEmail(email, otp) {
     try {
-        const message = new brevo.SendSmtpEmail();
+        const response = await brevo.transactionalEmails.sendTransacEmail({
+            subject: "Your Verification Code",
+            htmlContent: `
+                <h2>Your OTP Code</h2>
+                <p>Your verification code is:</p>
+                <h1>${otp}</h1>
+                <p>This code expires in 5 minutes.</p>
+            `,
+            sender: { name: "Nexus", email: process.env.EMAIL },
+            to: [{ email }],
+        });
 
-        message.subject = "Your Verification Code";
-        message.htmlContent = `
-            <h2>Your OTP Code</h2>
-            <p>Your verification code is:</p>
-            <h1>${otp}</h1>
-            <p>This code expires in 5 minutes.</p>
-        `;
-        message.sender = { name: "Nexus", email: process.env.EMAIL };
-        message.to = [{ email }];
-
-        const response = await apiInstance.sendTransacEmail(message);
-
-        console.log("OTP email sent:", response.body);
+        console.log("OTP email sent:", response);
         return response;
 
     } catch (err) {
-        console.log("Brevo send error:", err?.response?.body || err);
+        console.log("Brevo send error:", err?.rawResponse?.body || err);
         return null;
     }
 }
