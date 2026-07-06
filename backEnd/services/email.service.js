@@ -1,41 +1,35 @@
-import { Resend } from "resend";
+import * as brevo from "@getbrevo/brevo";
 
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(
+    brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+);
 
+export async function sendOTPEmail(email, otp) {
+    try {
+        const message = new brevo.SendSmtpEmail();
 
-import nodemailer from "nodemailer";
-
-const transporter = nodemailer.createTransport({
-    service:"gmail",
-    auth:{
-        user:process.env.EMAIL,
-        pass:process.env.APP_PASSWORD
-    }
-});
-
-export async function sendOTPEmail(email,otp){
-    try{
-
-        const response=await transporter.sendMail({
-            from:process.env.EMAIL,
-            to:email,
-            subject:"Your Verification Code",
-            html:`
+        message.subject = "Your Verification Code";
+        message.htmlContent = `
             <h2>Your OTP Code</h2>
             <p>Your verification code is:</p>
             <h1>${otp}</h1>
             <p>This code expires in 5 minutes.</p>
-            `
-        });
+        `;
+        message.sender = { name: "Nexus", email: process.env.EMAIL };
+        message.to = [{ email }];
 
-        console.log(response);
+        const response = await apiInstance.sendTransacEmail(message);
+
+        console.log("OTP email sent:", response.body);
         return response;
 
-    }catch(err){
-        console.log(err);
+    } catch (err) {
+        console.log("Brevo send error:", err?.response?.body || err);
         return null;
     }
 }
-
 // const resend = new Resend(
 //     process.env.RESEND_API_KEY
 // );

@@ -82,7 +82,7 @@ export function LoginPage() {
                             placeholder="Enter your password"
                             className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500"
                         />
-                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-14 md:right-120 invert mt-4 mr-2">
+                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-14 md:right-115 invert mt-4 mr-2">
                             {showPassword ? <FaEye /> : <FaEyeSlash />}
                         </span>
                         {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
