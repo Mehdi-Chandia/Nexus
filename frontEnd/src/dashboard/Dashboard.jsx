@@ -144,11 +144,11 @@ const Dashboard=()=>{
             if(!response.ok){
                 throw new Error(res.message)
             }
-            alert("logout successfully")
+            toast.success("logout successfully")
             navigate("/login");
 
         }catch(e){
-            console.log(e)
+            // console.log(e)
             alert(e.message)
         }
     }

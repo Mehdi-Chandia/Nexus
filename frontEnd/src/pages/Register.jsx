@@ -96,7 +96,7 @@ export function SignupPage() {
                             placeholder="Create password"
                             className="relative w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500"
                         />
-                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-40 md:right-115 mt-4 mr-2">
+                        <span onClick={()=> setShowPassword(!showPassword)}  className="cursor-pointer absolute z-30 right-14 md:right-115 mt-4 mr-2">
                             {showPassword ? <FaEye /> : <FaEyeSlash />}
                         </span>
 

@@ -1,213 +1,296 @@
-# Nexus Platform
+# Nexus
 
-## Project Overview
+Nexus is a full-stack platform that connects **entrepreneurs** and **investors**. Users can create role-specific profiles, browse potential matches, request and manage meetings, chat in real time, hop on a video call, share documents, and handle investment-related payments — all in one place.
 
-Nexus is an Investor & Entrepreneur collaboration platform where users can schedule meetings, conduct video calls, upload documents, and manage investment interactions securely.
-
----
-
-
-# Daily Progress Log
-
-## Day 1
-- connected to mongodb
-- created the user schema controllers and routes
-- also implemented token blacklistToken and middleware
-- tested APIs in postman
-- configured cloudinary and multer for file handling
-
-### In Progress
--  profile handling 
-
-### Issues Faced
-- handling two diff users with different fields
+**Live app:** https://nexus-lac-rho.vercel.app
 
 ---
 
+## Features
 
-## Day 2
-- created the profileComplete controller and tested it successfully
-- also created the model of meeting and notifications
-- created 5 controllers meeting and also include the relevant notifications in the response and link them to the specific user
-
-
-### In Progress
-- didn't tested the APIs of meeting yet only one endpoint is tested successfully
-
-### Issues Faced
-- it was a bit overwhelming when linking meetings and notifications and updating status and adding checks if it is the valid user
-
----
-
-## Day 3
-- Created the models of documents and payment completed the controllers of documents section 
-- Coded all three controllers and routes
-
-### In Progress
-- The payment thing is not completed yet instead I, haven't even touch it yet will come back to it later
-
-### Issues Faced
-- This part was the most difficult thing to do 
-- in the whole backend process ,the toughest part
-- was when I,had to link the documents with their scheduled meetings it was really a tough thing for me I,took the help from Ai in the process because I,was facing issues so that's it for now.   
+- **Authentication** — email/password signup and login, secured with JWT
+- **Two-Factor Login (OTP)** — a 6-digit code is emailed on every login and must be verified before a session is issued
+- **Forgot / Reset Password** — secure, time-limited reset links sent via email
+- **Role-Based Profiles** — separate profile completion flow and fields for entrepreneurs vs. investors
+- **Dashboards** — dedicated dashboard views for each role, showing relevant matches, meetings, and activity
+- **Meeting Requests** — request, accept, or reject meetings between investors and entrepreneurs
+- **Real-Time Chat** — Socket.IO-powered messaging tied to a specific meeting/connection
+- **Video Calls** — peer-to-peer video calls built with WebRTC
+- **Document Sharing** — upload and view documents linked to a specific meeting, stored via Cloudinary
+- **Payments** — Stripe integration for handling transactions, with a full transaction history on the dashboard
+- **Notifications** — in-app notifications for meeting requests, responses, and other key events
 
 ---
 
-## Day 4
-- Moved to FrontEnd after completing and testing all the controllers and APIs.
-- Created the SignUp and LogIn page in React and in form also added the react-hook-form validation and 
-- Also implemented the showPassword eye icon and configured the cors in the backend to allow the frontend origin.
-- After creating the pages integrated then with backend and call APIs and tested them.
+## Tech Stack
 
-### In Progress
-- Nothing is in progress for now but there is a lot to do.
+**Frontend**
+- React 19 + Vite
+- React Router v7
+- Tailwind CSS v4
+- React Hook Form
+- Socket.IO Client
+- Stripe.js
+- Framer Motion, React Icons, React Toastify
 
-### Issues Faced
-- Didn't face any issues because this was the easiest thing to do there is no rocket science in this.
+**Backend**
+- Node.js + Express 5
+- MongoDB + Mongoose
+- Socket.IO
+- JWT for authentication
+- Bcrypt for password hashing
+- Joi for request validation
+- Multer + Cloudinary for file uploads
+- Brevo (transactional email API) for OTP and password-reset emails
+- Stripe for payments
+
+**Deployment**
+- Frontend: Vercel
+- Backend: Render
+- Database: MongoDB Atlas
+
 ---
 
-## Day 5
-- Today was really a productive day as i learn a lot of new things today
-- first of all i implemented the 2FA/MFA whatever you call it after user logs in we send a verification otp to its email which user gets and then verifies 
-- i added the fields in user model and created the otp controllers changed the login controller which was generating token after verifying email and password in db but now it will generate the token after verfying the otp
-- I used resend library to send email to user its free and easy to use
-- After this i also implemented the forgot password thing created its contollers and added its fields in user model i used crypto module for generating the token and again resend to send the reset link
-- in reset controller it first verifies the token if its valid or not then proceeds
-- also created the pages of otp-verification and forgot password and integrated the APIs
+## Project Structure
 
-### In Progress
-- The reset password is yet to complete, its backend is complete but still have to create its frontend page.
+```
+nexus/
+├── backEnd/
+│   ├── controllers/     # Route logic (auth, meetings, chat, documents, payments)
+│   ├── models/          # Mongoose schemas (user, meeting, chat, document, transaction, notification, token)
+│   ├── routes/          # Express route definitions
+│   ├── middlewares/      # Auth middleware (JWT verification, token blacklist check)
+│   ├── services/        # Email service (Brevo)
+│   ├── validation/       # Joi schemas
+│   ├── config/           # Cloudinary config
+│   └── server.js         # App entry point
+│
+└── frontEnd/
+    ├── src/
+    │   ├── pages/         # Route-level pages (auth, chat, meetings, payments, static pages)
+    │   ├── dashboard/      # Entrepreneur dashboard
+    │   ├── investorDashboard/  # Investor dashboard
+    │   ├── meeting/        # Meeting request flow
+    │   ├── components/     # Shared UI components
+    │   └── lib/            # API config
+    ├── context/            # Auth context (global user state)
+    └── vercel.json         # SPA rewrite config for client-side routing
+```
 
-### Issues Faced
-- There were no big issues but there was learning.
 ---
 
-## Day 6
-- Today I completed the remaining setup for forgot password completed its backend and the frontend page and integrated its API 
-- Then i started the core part of this project the dashboard i created its left sidebar of the ui added specific icons and links
+## Getting Started (Local Development)
 
-### In Progress
-- The dashboard is in progress
+### Prerequisites
+- Node.js (v18+ recommended)
+- A MongoDB instance (local or Atlas)
+- Accounts/API keys for: Brevo, Cloudinary, Stripe
 
-### Issues Faced
-- No issues faced for today
+### Backend Setup
+```bash
+cd backEnd
+npm install
+```
+
+Create a `.env` file in `backEnd/` with:
+```
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+FRONTEND_URL=http://localhost:5173
+
+BREVO_API_KEY=your_brevo_api_key
+EMAIL=your_verified_sender_email
+
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+```
+
+Run the backend:
+```bash
+npm run dev
+```
+
+### Frontend Setup
+```bash
+cd frontEnd
+npm install
+```
+
+Create a `.env` file in `frontEnd/` with:
+```
+VITE_API_URL=http://localhost:3000
+VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
+```
+
+Run the frontend:
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`, connecting to the backend at `http://localhost:3000`.
+
 ---
 
-## Day 7
-- Today started from where i left the dashboard yesterday.completed the main section of dashboard
-- then created the context API to store the login user and use it in different pages
+## Notes on Production Setup
 
+- **Email delivery:** Uses Brevo's transactional email API (not SMTP), since most cloud hosts — including Render's free tier — block outbound SMTP ports (25/465/587). Brevo's sender email must be verified in the Brevo dashboard before emails will send.
+- **Client-side routing:** `frontEnd/vercel.json` includes a rewrite rule so that refreshing on any nested route (e.g. `/dashboard`) correctly serves `index.html` instead of a 404, since Vercel doesn't know about React Router's client-side routes by default.
+- **Cross-domain auth:** Frontend and backend are deployed on different domains (Vercel and Render). Cookie-based auth across different domains is subject to third-party cookie blocking in some browsers (Safari, Firefox, and Chrome in Incognito block it by default) — a Bearer-token-based auth flow is a known follow-up improvement to make this fully browser-independent.
 
-### In Progress
-- Now i have to call different APIs on that dashboard page show the data.
-
-### Issues Faced
-- No issues
 ---
 
-## Day 7
-- Started with the Authuser the login user handling 
-- then included the logout api 
-- then call the fetch all user api to show the investors on the entrepreneur's page
+## Daily Development Log
 
+### Day 1
+- Connected to MongoDB
+- Created the user schema, controllers, and routes
+- Implemented the token blacklist and auth middleware
+- Tested APIs in Postman
+- Configured Cloudinary and Multer for file handling
 
-### In Progress
-- The dashboard is in progress 
+**In Progress:** Profile handling
+**Challenges:** Handling two different user types (entrepreneur/investor) with different fields
 
-### Issues Faced
-- I was facing the issue on dashboard because in context i was setting the loading state false initially and because of this as soon i refresh the dashboard page it push me to login page
-- so fixed it by setting loading state true initially when page renders it sees loading true shows loader and when loading becomes false it checks the user and then proceed
-- never call state setters in component body, call always inside functions 
 ---
 
-## Day 8
-- First of all i, created the complete-profile page i forgot it to create early but now its created
-- then i, moved to meetings first i created the create-meeting page to request meetings with investors
-- called different APIs and store them in states like meetings notifications and also filtered accedpted meetings
+### Day 2
+- Built and successfully tested the profile-complete controller
+- Created the meeting and notification models
+- Built 5 meeting controllers, linking relevant notifications to the correct user in each response
 
+**In Progress:** Meeting API testing — only one endpoint fully tested so far
+**Challenges:** Linking meetings and notifications together while validating the correct user was a bit overwhelming
 
-### In Progress
-- meetings and notifications functionality
-
-### Issues Faced
-- i was facing the issue on complete profile page like when user signs up it pushes to complete-profile but it first checks if the user from context hook but at that time user is not set in the hook and so user is null it again throws me to sign up page so, i set the user after registering user when user registers set the response user coming from backend to that state of contexg
 ---
 
-## Day 9
-- Integrated different APIs of meeting like rejecting/accepting meeting
-- make changes on dashboard interface and show real data of user
-- created the seperate dashboard for investor i didn't create but claude created it according to my already created dashboard for investor which i created by myself. 
+### Day 3
+- Created the document and payment models; completed the document controllers
+- Built all three controllers and their routes
 
+**In Progress:** Payment logic — not started yet
+**Challenges:** Linking documents to their scheduled meetings was the toughest part of the backend so far; used AI assistance to work through it
 
-### In Progress
-- Next will be notifications setup and then will move to video calls and payment integration
-
-### Issues Faced
-- Nothing serious
 ---
 
-## Day 10
-- First of all added the login user's authorization handling on role base and pushing them to their respective dadhboards
-- setup of socket io never used it before so, it was my first time experience using it 
-- integrated socket in both backend and frontend and then check its working by sending simple messages
+### Day 4
+- Moved to the frontend after finishing and testing all backend controllers/APIs
+- Built the Sign Up and Log In pages in React, with React Hook Form validation
+- Added a show/hide password toggle and configured CORS on the backend to allow the frontend origin
+- Connected the new pages to the backend and tested the calls
 
+**In Progress:** Nothing blocking — lots more to build
+**Challenges:** None — straightforward day
 
-### In Progress
-- Socket io is in progress still there is lot to do with it how it will work with real users
-
-### Issues Faced
-- It was a bit confusing or boring i, can say because using socket io first time so it was a bit confusing not difficult.
 ---
 
-## Day 11
-- Back after a bit of absense started where left it with socket created models, controllers and routes for chat messages
-- connected socket with real users and meetings
-- created the chat page and called the previous messages api
+### Day 5
+- Implemented 2FA/OTP: after login, a verification code is emailed and must be confirmed before a session is granted
+- Added the relevant fields to the user model and built the OTP controllers; updated the login flow so the token is issued after OTP verification instead of right after password check
+- Used Resend (free, simple) to send emails
+- Implemented forgot password: added the reset-token fields to the user model, used the `crypto` module to generate reset tokens, and sent reset links via Resend
+- Reset controller validates the token before allowing the password change
+- Built the OTP verification and forgot-password pages and wired up their APIs
 
-### In Progress
-- Socket io 
+**In Progress:** Reset-password backend is done; frontend page still needed
+**Challenges:** No major issues — mostly new territory and learning
 
-### Issues Faced
-- Socket io is confusing for me!
 ---
 
-## Day 11
-- Completed the socket working ,it is working smoothly with real time messaging 
-- 
+### Day 6
+- Finished the reset-password frontend page and wired up its API
+- Started the core dashboard UI — built the sidebar with icons and navigation links
 
-### In Progress
-- Socket io
+**In Progress:** Dashboard build
+**Challenges:** None
 
-### Issues Faced
-- there were lot of issues today i, wasn't handling the errors correctly which was causing problem 
-- one thing learn from this always check the whole flow how its going and where the data is breaching find the cause and detect the error
 ---
 
+### Day 7
+- Completed the main dashboard section
+- Created the Auth Context to store the logged-in user and share it across pages
+- Added the logged-in-user handling and logout API
+- Wired up the "get all users" API to show investors on the entrepreneur's dashboard
 
-## Day 12
-- Back to work after ages i was busy with my exams now back to coding finally completed the video call using WEBRTC
-- Also implemented minor changes in investor dashboard minor but important
-- added the documents uploading page with view of the uploaded documents
+**In Progress:** Calling the remaining APIs to populate real dashboard data
+**Challenges:** Fixed a bug where the auth context's initial `loading` state was `false`, which caused a refresh on the dashboard to redirect straight to login. Fixed by defaulting `loading` to `true` on mount, showing a loader until the user check resolves. Learned: never call state setters directly in the component body — only inside functions/effects.
 
-### In Progress
-- The other dashboard is in process as the investor side is completed
-
-### Issues Faced
-- Working with socket and webRTC without understanding it was really a headache for me i, didn't know a single thing about these two
-- I'm still confused how it is working the code as i took the help of AI in this webRTC thing
 ---
 
-## Day 13
-- Completed the other remaining sections as well 
-- first of all integrated stripe for transactions 
-- then implemented it in both frontEnd and backend
-- showed all transactions history on dasshboard
-- created the about and contact pages
-- changed the otp send service from resend to nodemailer because resend wasn't working
+### Day 8
+- Built the complete-profile page (missed earlier in the flow)
+- Built the create-meeting page for requesting meetings with investors
+- Wired up meeting and notification APIs, storing them in state and filtering accepted meetings
 
-### In Progress
-- Nothing is in progress for now 
+**In Progress:** Meetings and notifications functionality
+**Challenges:** After signup, the app redirected to complete-profile, but the auth context's `user` wasn't set yet at that point, bouncing the user back to sign up. Fixed by setting the user in context directly from the signup response instead of waiting on a separate fetch.
 
-### Issues Faced
-- Didn't face that many issues 
 ---
+
+### Day 9
+- Integrated the accept/reject meeting APIs
+- Updated the dashboard UI to show real user data
+- Built a separate investor dashboard, based on the existing entrepreneur dashboard layout, with AI assistance
+
+**In Progress:** Notifications, then video calls and payment integration
+**Challenges:** Nothing major
+
+---
+
+### Day 10
+- Added role-based redirect logic so users land on the correct dashboard after login
+- Set up Socket.IO (first time using it) on both frontend and backend, and confirmed basic messaging worked
+
+**In Progress:** Getting Socket.IO working reliably with real users
+**Challenges:** More unfamiliar than difficult — first time working with WebSockets
+
+---
+
+### Day 11
+- Built the chat models, controllers, and routes for messages
+- Connected sockets to real users and their meetings
+- Built the chat page and wired up the previous-messages API
+- Got real-time messaging fully working end-to-end
+
+**In Progress:** Socket.IO refinement
+**Challenges:** Error handling wasn't solid at first, which caused hard-to-trace bugs. Key takeaway: trace the full data flow end-to-end to pinpoint exactly where something breaks, rather than guessing.
+
+---
+
+### Day 12
+- Completed video calling with WebRTC
+- Made small but important updates to the investor dashboard
+- Added the document upload page with a view of uploaded documents
+
+**In Progress:** Entrepreneur-side dashboard (investor side is complete)
+**Challenges:** WebRTC and Socket.IO together were difficult to fully understand — used AI assistance to work through the implementation
+
+---
+
+### Day 13
+- Integrated Stripe on both frontend and backend
+- Added transaction history to the dashboard
+- Built the About and Contact pages
+- Switched OTP email delivery from Resend to Nodemailer (Resend wasn't working at the time)
+
+**In Progress:** Nothing blocking
+**Challenges:** Relatively smooth day
+
+---
+
+### Day 14
+- Deployed frontend to Vercel and backend to Render
+- Diagnosed and fixed a hardcoded `localhost` URL in Auth Context that broke every page load in production
+- Fixed cross-site cookie configuration (`secure`/`sameSite`) for the auth token
+- Diagnosed that Render's free tier blocks outbound SMTP — migrated email sending off Nodemailer entirely
+- Tried Resend's sandbox sender, hit its "verified recipients only" restriction without a custom domain
+- Switched email delivery to Brevo (API-based, works without owning a domain, verified sender only)
+- Added a `vercel.json` rewrite rule to fix 404s on refresh for client-side routes
+- Added lazy loading (`React.lazy` + `Suspense`) across all routes to shrink the initial bundle size
+- Identified that cookie-based auth across the Vercel/Render domain split gets blocked by third-party cookie policies in Incognito, Safari, and Firefox — noted as a follow-up to migrate to header-based (Bearer token) auth
+
+**In Progress:** Migrating auth from cookies to Bearer tokens for full cross-browser reliability
+**Challenges:** Most of today was infrastructure debugging rather than feature work — cold starts and SMTP blocking on Render's free tier, and cross-domain cookie behavior differing by browser, took a lot of trial and error to fully diagnose

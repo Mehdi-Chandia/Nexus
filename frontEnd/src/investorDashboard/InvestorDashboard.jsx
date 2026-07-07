@@ -77,7 +77,7 @@ const InvestorDashboard = () => {
             })
             const res = await response.json()
             if (!response.ok) throw new Error(res.message)
-            alert("logout successfully")
+            toast.success("logout successfully")
             navigate("/login")
         } catch (e) {
             alert(e.message)
@@ -915,10 +915,10 @@ const InvestorDashboard = () => {
         <div className="p-4">
             <h2 className="text-xl font-bold text-green-400 mb-6">Investment Opportunities</h2>
 
-            {meetings.length > 0 ? (
+            {acceptedMeetings.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
-                    {meetings.map((m) => (
+                    {acceptedMeetings.map((m) => (
                         <div key={m._id} className="bg-[#0D1626] border border-gray-700 rounded-2xl p-5 hover:scale-[1.02] hover:border-green-500 transition-all duration-300 shadow-md">
 
                             <div className="flex items-center gap-3 mb-4">
