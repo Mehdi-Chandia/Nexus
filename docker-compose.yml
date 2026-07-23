@@ -1,0 +1,24 @@
+
+services:
+
+#  BACKEND
+
+  backend:
+    build: ./backEnd
+    container_name: nexus-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    env_file:
+      - ./backEnd/.env
+
+# FRONTEND
+
+  frontend:
+    build: ./frontEnd
+    container_name: nexus-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend

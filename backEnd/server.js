@@ -49,7 +49,6 @@ connectToDb();
 
 
 
-// ----- routes (unchanged) -----
 app.use("/api/auth", userRoutes);
 app.use("/api/meeting", meetingRoutes);
 app.use("/api/notification", notificationRoutes);
