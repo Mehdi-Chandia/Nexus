@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: "24"
       - name: install dependencies
-        working-directory: ./backend
+        working-directory: ./backEnd
         run: npm install
 
 # job 2 create frontend and build its code
@@ -34,15 +34,15 @@ jobs:
           node-version: "24"
 
       - name: install dependencies
-        working-directory: ./frontend
+        working-directory: ./frontEnd
         run: npm run install
 
       - name: lint check
-        working-directory: ./frontend
+        working-directory: ./frontEnd
         run: npm run lint
 
       - name: build frontend
-        working-directory: ./frontend
+        working-directory: ./frontEnd
         run: npm run build
 
 # Job 3 create image and push to docker hub
