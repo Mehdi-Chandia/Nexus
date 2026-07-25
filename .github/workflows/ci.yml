@@ -35,7 +35,7 @@ jobs:
 
       - name: install dependencies
         working-directory: ./frontEnd
-        run: npm run install
+        run: npm install
 
       - name: lint check
         working-directory: ./frontEnd
