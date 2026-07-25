@@ -61,10 +61,10 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/nexus-backend:latest ./backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/nexus-backend:latest ./backEnd
           docker push ${{ secrets.DOCKER_USERNAME }}/nexus-backend:latest
           
       - name: Build and push frontend image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/nexus-frontend:latest ./frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/nexus-frontend:latest ./frontEnd
           docker push ${{ secrets.DOCKER_USERNAME }}/nexus-frontend:latest    
